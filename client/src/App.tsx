@@ -1,8 +1,16 @@
+import {Switch, BrowserRouter as Router, Route} from 'react-router-dom'
+import AuthPage from './Pages/AuthPage';
+
+
 const App = ():JSX.Element  => {
   return (
-    <div className="App">
-      <h1>Hello World</h1>
-    </div>
+    <>
+      <Router>
+        <Switch>
+          <Route exact path = '/auth' component={AuthPage} />
+        </Switch>
+      </Router>
+    </>
   );
 }
 
