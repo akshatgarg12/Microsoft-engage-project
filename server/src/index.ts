@@ -1,26 +1,52 @@
+import http from 'http'
 import express from 'express'
 import {Request, Response} from 'express'
+import {Server} from 'socket.io'
 import cors from 'cors'
 import { config } from "dotenv"
-config()
+import {__prod__} from './constants'
 const app = express()
-const PORT = process.env.PORT || 8080
-
+const PORT = Number(process.env.PORT) || 8080
+const server = http.createServer(app)
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+config()
 
-app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  })
-);
-app.set("trust proxy", 1);
+app.use(cors());
 
 app.get('/', (req:Request, res:Response) => {
-    res.send("Hello World")
+  res.send("Hello World")
 })
-app.listen(PORT, () => {
+
+const io = new Server({
+  path : '/'
+})
+io.attach(server, {
+    pingInterval: 10000,
+    pingTimeout: 5000,
+    cookie: true,
+    cors:{
+      origin:'*'
+    }
+});
+
+io.on('connection', (socket) => {
+  socket.on('open', (e) => {
+    console.log('Connection with client opened!!')
+  })
+  socket.emit('hello', 'world')
+  socket.emit('testt', 'world')
+  socket.emit('hello', 'world')
+  if(!__prod__){
+    socket.onAny((event, ...args) => {
+      console.log(event, args);
+    }); 
+  }
+  
+})
+
+
+server.listen(PORT, () => {
   console.log(`server running at port:${PORT}`)
 })
 
