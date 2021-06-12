@@ -5,6 +5,7 @@ import {Server} from 'socket.io'
 import cors from 'cors'
 import { config } from "dotenv"
 import {__prod__} from './constants'
+import DatabaseConnection from './config/mongodb'
 const app = express()
 const PORT = Number(process.env.PORT) || 8080
 const server = http.createServer(app)
@@ -45,8 +46,16 @@ io.on('connection', (socket) => {
   
 })
 
+const serverStart = async () => {
+  try{
+    await DatabaseConnection()
+    server.listen(PORT, () => {
+      console.log(`server running at port:${PORT}`)
+    })
+    
+  }catch(e){
+    console.error(e)
+  }
+}
 
-server.listen(PORT, () => {
-  console.log(`server running at port:${PORT}`)
-})
-
+serverStart()
