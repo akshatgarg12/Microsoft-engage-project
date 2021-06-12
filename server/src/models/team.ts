@@ -23,6 +23,14 @@ const TeamSchema = new mongoose.Schema<Team>({
     timestamps:true
 })
 
+TeamSchema.pre('save',async function(next) {
+    var team = this;
+    if(!team.members) team.members = []
+    if(!team.members.includes(team.creator)){
+        team.members.push(team.creator)
+    }
+    next()
+});
 const Team = mongoose.model('Team', TeamSchema)
 
 export default Team

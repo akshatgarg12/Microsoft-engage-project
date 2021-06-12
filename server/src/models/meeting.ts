@@ -13,6 +13,10 @@ const MeetingSchema = new mongoose.Schema<Meeting>({
        type:String,
        required: [true, 'meeting title is required']
    },
+   teamId:{
+       type: ObjectId,
+       ref : 'Team',
+   },
    creator:{
        type: ObjectId,
        ref : 'User',
