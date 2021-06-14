@@ -31,19 +31,28 @@ io.attach(server, {
     }
 });
 
+
+let usersOfRoom:any = {}
 io.on('connection', (socket) => {
-  socket.on('open', (e) => {
-    console.log('Connection with client opened!!')
-  })
-  socket.emit('hello', 'world')
-  socket.emit('testt', 'world')
-  socket.emit('hello', 'world')
-  if(!__prod__){
-    socket.onAny((event, ...args) => {
-      console.log(event, args);
-    }); 
-  }
+  socket.on('join-room', (roomId, userId) => {
+    console.log(usersOfRoom)
+    // save the info in a database.
+    if(usersOfRoom[roomId]){
+      usersOfRoom[roomId].push(userId)
+    }else{
+      usersOfRoom[roomId] = [userId]
+    }
+    // room id and active users
+    socket.emit('all-users', usersOfRoom[roomId])
+    // whenever this event is emitted , send user details to connect at client
+    socket.emit('user-connected', userId)
+    // send a all-users list for the person connected so that they can connect with everyone else
+    // if disconnected send the signal to destroy this peer connection
+    socket.on('disconnect', () => {
+      socket.broadcast.to(roomId).emit('user-disconnected', userId)
+    })
   
+  })
 })
 
 const serverStart = async () => {
