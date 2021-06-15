@@ -1,0 +1,12 @@
+.nav{
+    background-color:'#323131';
+    color:'white';
+}
+.center{
+    margin: auto 10px;
+}
+.logo{
+    font-style: italic;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 1.25rem;
+}

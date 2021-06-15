@@ -4,7 +4,7 @@ export interface MeetingPageProps {
     
 }
  
-const MeetingPage: React.FC<MeetingPageProps> = () => {
+const MeetingPage = ():JSX.Element => {
     return (
         <Meeting />
     );
