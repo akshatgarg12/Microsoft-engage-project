@@ -4,6 +4,7 @@ import Navbar from './components/Templates/Navbar';
 import AuthPage from './Pages/AuthPage';
 import Dashboard from './Pages/Dashboard';
 import MeetingPage from './Pages/Meeting';
+import TeamPage from './Pages/TeamPage';
 
 
 const App = ():JSX.Element  => {
@@ -15,6 +16,7 @@ const App = ():JSX.Element  => {
             <Route exact path = '/' component={Dashboard} />
             <Route  path = '/auth' component={AuthPage} />
             <Route path = '/meeting' component={MeetingPage} />
+            <Route path = '/team/:id' component={TeamPage} />
           </Switch>
         <Footer />
       </Router>

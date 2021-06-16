@@ -70,7 +70,7 @@ const Meeting = (): JSX.Element => {
             })
             call.on('close', () => {
                 console.log('remove disconnected user video')
-            //   video.remove()
+                //   video.remove()
             })
             peers[userId] = call
         } 
