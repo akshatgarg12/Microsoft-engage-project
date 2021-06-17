@@ -2,6 +2,7 @@ import http from 'http'
 import express from 'express'
 import {Request, Response} from 'express'
 import {Server} from 'socket.io'
+import API from './routes'
 import cors from 'cors'
 import { config } from "dotenv"
 import {__prod__} from './constants'
@@ -14,13 +15,13 @@ app.use(express.urlencoded({extended:true}))
 config()
 
 app.use(cors());
-
+app.use('/api',API)
 app.get('/', (req:Request, res:Response) => {
   res.send("Hello World")
 })
 
 const io = new Server({
-  path : '/'
+  path : '/sockets'
 })
 io.attach(server, {
     pingInterval: 10000,
