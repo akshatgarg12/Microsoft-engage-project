@@ -4,9 +4,11 @@ import {Request, Response} from 'express'
 import {Server} from 'socket.io'
 import API from './routes'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import { config } from "dotenv"
 import {__prod__} from './constants'
 import DatabaseConnection from './config/mongodb'
+import isAuthenticated from './middleware/auth'
 const app = express()
 const PORT = Number(process.env.PORT) || 8080
 const server = http.createServer(app)
@@ -14,9 +16,32 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 config()
 
-app.use(cors());
+// cookies
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Credentials", 'true');
+  res.header("Access-Control-Allow-Origin", req.headers.origin);
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET,PUT,POST,DELETE,UPDATE,OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "X-Requested-With, X-HTTP-Method-Override, Content-Type, Accept"
+  );
+  next();
+});
+// to make cookies work
+app.use(
+  cors({
+    credentials: true,
+    origin: true,
+  })
+);
+app.set("trust proxy", 1);
+app.use(cookieParser());
+
 app.use('/api',API)
-app.get('/', (req:Request, res:Response) => {
+app.get('/', isAuthenticated, (req:Request, res:Response) => {
   res.send("Hello World")
 })
 

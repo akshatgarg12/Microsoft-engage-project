@@ -1,6 +1,29 @@
 import User from '../models/user'
 import {Request, Response} from 'express'
+import {config} from 'dotenv'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+config()
+const OneDayInSec = 1 * 24 * 60 * 60;
+
+const secret :string = process.env.JWT_SECRET || 'secret'
+const getToken = (_id:string) => {
+  const token = jwt.sign({ _id }, secret, {
+    expiresIn: OneDayInSec,
+  });
+  return token;
+};
+const __prod__ = process.env.NODE_ENV === "production";
+const devCookieConfig = {
+   httpOnly: true,
+}
+const prodCookieConfig = {
+  httpOnly: true,
+  sameSite: "None",
+  secure: __prod__,
+};
+const cookieConfig = __prod__ ? prodCookieConfig : devCookieConfig
+
 
 const login = async (req:Request, res:Response) => {
     try{
@@ -14,7 +37,11 @@ const login = async (req:Request, res:Response) => {
             // compare password
             const passwordMatch = await bcrypt.compare(password, user.password)
             if(passwordMatch){
-                // set cookie and sessions
+                // set cookie 
+                res.cookie("user", getToken(user._id), {
+                    maxAge: OneDayInSec * 1000,
+                    ...cookieConfig,
+                });
                 res.status(200).json({status:'200', log:'user successfully logged in'})
             }else{
                 res.status(400).json({status:'400', log:'incorrect credentials'})
