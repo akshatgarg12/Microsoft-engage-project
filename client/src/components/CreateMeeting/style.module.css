@@ -1,0 +1,13 @@
+.container{
+    height:100%;
+    width: 70%;
+}
+
+.image{
+    max-height: 30%;
+    height:350px;
+    width: 350px;
+    max-width: 80%;
+    object-fit: contain;
+}
+
