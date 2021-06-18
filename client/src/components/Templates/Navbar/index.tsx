@@ -9,7 +9,7 @@ const Navbar = ():JSX.Element => {
     const {user} = useAuth()
     const redirectToDashboard = () => history.push('/')
     return (
-        <Flex space="between" style={{background:'#3a3942', color:'white'}}>
+        <Flex space="between" style={{background:'#3a3942', color:'white', minHeight:'3rem'}}>
            <Text onClick = {redirectToDashboard} content="Microsoft engage" className={`${classes.center} ${classes.logo}`} /> 
            {
                user && 
