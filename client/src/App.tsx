@@ -1,4 +1,5 @@
 import {Switch, BrowserRouter as Router, Route} from 'react-router-dom'
+import ProtectedRoute from './components/ProtectedRoute';
 import Footer from './components/Templates/Footer';
 import Navbar from './components/Templates/Navbar';
 import AuthPage from './Pages/AuthPage';
@@ -13,10 +14,10 @@ const App = ():JSX.Element  => {
       <Router>
         <Navbar />
           <Switch>
-            <Route exact path = '/' component={Dashboard} />
             <Route  path = '/auth' component={AuthPage} />
-            <Route path = '/meeting' component={MeetingPage} />
-            <Route path = '/team/:id' component={TeamPage} />
+            <ProtectedRoute path = '/' component={Dashboard} exact = {true} />
+            <ProtectedRoute path = '/meeting' component={MeetingPage} />
+            <ProtectedRoute path = '/team/:id' component={TeamPage} />
           </Switch>
         <Footer />
       </Router>

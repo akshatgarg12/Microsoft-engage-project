@@ -1,5 +1,8 @@
 import { Form, FormInput, FormCheckbox, FormButton, Text } from '@fluentui/react-northstar';
 import { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { AuthReducerActionType } from '../../../context/Auth';
+import useAuth from '../../../hooks/useAuth';
 import useHttps from '../../../hooks/useHttp';
 
 interface LoginFormData{
@@ -7,12 +10,14 @@ interface LoginFormData{
   password : string
 }
 
-const LoginForm = ():JSX.Element => {
+const LoginForm = ():JSX.Element | null => {
   const [trigger, setTrigger] = useState<boolean>(false)
   const [formData, setFormData] = useState<LoginFormData>({
     email : '',
     password : ''
   })
+  const {dispatch} = useAuth()
+  const history = useHistory()
   const {response,error,loading} = useHttps({
       path:'/login',
       method:'POST',
@@ -28,7 +33,12 @@ const LoginForm = ():JSX.Element => {
     e.preventDefault()
     setTrigger(true)
   }
-  
+  if(response){
+    // set the user login and push to dashboard
+    dispatch({type : AuthReducerActionType.LOGIN, payload : response.user})
+    history.push('/')
+    return null
+  }
   return(
     <Form
       style={{

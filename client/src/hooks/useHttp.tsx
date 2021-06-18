@@ -47,9 +47,9 @@ const useHttps = ({path, method, body, headers, trigger, setTrigger}:useHttpsPro
         }
         if(trigger)
             request()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [trigger, path, body, headers, method])
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [trigger])
     
     return {loading, response, error}
 }
