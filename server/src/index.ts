@@ -5,6 +5,7 @@ import {Server} from 'socket.io'
 import API from './routes'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
+import {RequestLogger} from 'reqlogs'
 import { config } from "dotenv"
 import {__prod__} from './constants'
 import DatabaseConnection from './config/mongodb'
@@ -12,10 +13,9 @@ import isAuthenticated from './middleware/auth'
 const app = express()
 const PORT = Number(process.env.PORT) || 8080
 const server = http.createServer(app)
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
-config()
 
+config()
+const RL = new RequestLogger({showLatestFirst:true, ignore_urls:['/sockets']})
 // cookies
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", 'true');
@@ -38,8 +38,10 @@ app.use(
   })
 );
 app.set("trust proxy", 1);
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
 app.use(cookieParser());
-
+app.use(RL.Webpage({url : '/logs'}))
 app.use('/api',API)
 app.get('/', isAuthenticated, (req:Request, res:Response) => {
   res.send("Hello World")

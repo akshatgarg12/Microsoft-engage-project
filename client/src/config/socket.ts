@@ -1,7 +1,5 @@
 import {io} from 'socket.io-client'
-import {SERVER_URL, __prod__} from '../constants'
-
-const SOCKET_PATH = '/'
+import {SERVER_URL, __prod__, SOCKET_PATH} from '../constants'
 
 const socket = io(SERVER_URL, {
     path : SOCKET_PATH,
