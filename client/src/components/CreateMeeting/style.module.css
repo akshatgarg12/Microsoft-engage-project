@@ -8,6 +8,7 @@
     height:350px;
     width: 350px;
     max-width: 80%;
+    margin-bottom: 20px;
     object-fit: contain;
 }
 

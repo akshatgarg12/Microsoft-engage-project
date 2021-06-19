@@ -42,7 +42,8 @@ const login = async (req:Request, res:Response) => {
                     maxAge: OneDayInSec * 1000,
                     ...cookieConfig,
                 });
-                res.status(200).json({status:'200', log:'user successfully logged in'})
+                user.password = undefined
+                res.status(200).json({status:'200', log:'user successfully logged in', user})
             }else{
                 res.status(400).json({status:'400', log:'incorrect credentials'})
             }
@@ -82,7 +83,18 @@ const register = async (req:Request, res:Response) => {
     }
 }
 
+const currentUser = (req:Request, res:Response) => {
+    // @ts-ignore
+    const {user} = req
+    res.status(200).json({status:'200', log:'current user info', user})
+}
+const logout = (req:Request, res:Response) => {
+    res.clearCookie('user')
+    res.status(200).json({status:'200',log:'user logged out'})
+}
 export {
     login,
-    register
+    register,
+    currentUser,
+    logout
 }

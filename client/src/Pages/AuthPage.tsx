@@ -22,7 +22,7 @@ const AuthPage = ():JSX.Element => {
     const imageSrc = 'https://image.flaticon.com/icons/png/512/906/906349.png'
     const [activeIndex, setActiveIndex] = useState<number>(0)
     return (
-        <Flex style ={{height : '90vh'}} wrap gap="gap.smaller" space="between">
+        <Flex style ={{minHeight : '90vh'}} wrap gap="gap.smaller" space="between">
             <Image
                 style={{
                     height:'12rem',
