@@ -1,24 +1,30 @@
 import { Flex, Image, Text, Avatar, Card } from '@fluentui/react-northstar';
 import { useHistory } from 'react-router-dom';
 
-const TeamCard = ():JSX.Element => {
+export interface TeamCardProps{
+    teamId : string,
+    name : string,
+    creator : any
+}
+
+const TeamCard = ({teamId, name, creator}:TeamCardProps):JSX.Element => {
     const history = useHistory()
-    const redirectToTeamPage = (id:any) => history.push(`/team/1`)
+    const redirectToTeamPage = (id:any) => history.push(`/team/` + teamId)
     return (
     <Card onClick={redirectToTeamPage} aria-roledescription="card with avatar, image and text" style={{margin:'5px auto'}}>
         <Card.Header>
             <Flex gap="gap.small">
                 {/* Photo of person */}
                 <Avatar
-                    name="Cecil Folk"
+                    name={creator.name.toUpperCase()}
                     status={{
                         color: 'green',
                         title: 'Available',
                     }}
                 />
             <Flex column>
-                <Text content="Name of Team" weight="bold" />
-                <Text content="Created By" size="small" />
+                <Text content={name.toUpperCase()} weight="bold" />
+                <Text content={'Created by: ' + creator.name.toUpperCase()} size="small" />
             </Flex>
             </Flex>
         </Card.Header>
