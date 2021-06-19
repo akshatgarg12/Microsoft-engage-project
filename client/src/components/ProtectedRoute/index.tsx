@@ -5,7 +5,7 @@ const ProtectedRoute = ({component, path, ...rest}:any) : JSX.Element | null => 
     const {user} = useAuth()
     const history = useHistory()
     if(!user){
-        alert('Login to get access to this page!')
+        // alert('Login to get access to this page!')
         history.replace('/auth')
         return null
     }

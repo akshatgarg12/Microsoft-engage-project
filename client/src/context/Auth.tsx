@@ -1,6 +1,5 @@
-import { useReducer, useState } from 'react'
+import { useReducer } from 'react'
 import {createContext} from 'react'
-import useHttps from '../hooks/useHttp'
 
 export const AuthContext = createContext<any>(null)
 
@@ -31,20 +30,7 @@ const AuthReducer = (state:any ,action:any) => {
 const AuthContextProvider = ({children}:any) => {
     const u = localStorage.getItem('user')
     const initialState =  u ? JSON.parse(u) : null 
-    const [trigger, setTrigger] = useState<boolean>(true)
-    const {response, loading, error} = useHttps({
-        path : '/user',
-        method : 'GET',
-        trigger,
-        setTrigger
-    })
     const [user, dispatch] = useReducer<any>(AuthReducer, initialState)
-    if(!loading && response){
-        localStorage.setItem('user', JSON.stringify(response.user))
-    }
-    if(error){
-        localStorage.removeItem('user')
-    }
     return (
         <AuthContext.Provider value={{
             user, dispatch

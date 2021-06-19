@@ -1,6 +1,6 @@
 import { Form, FormInput, FormCheckbox, FormButton, Text } from '@fluentui/react-northstar';
-import { useState } from 'react';
-import useHttps from '../../../hooks/useHttp';
+import { useReducer, useState } from 'react';
+import { callAPI, CallAPIReducer } from '../../../utils/http';
 
 interface RegisterFormData{ 
   name : string,
@@ -9,26 +9,35 @@ interface RegisterFormData{
 }
 
 const RegisterForm = ():JSX.Element => {
-    const [trigger, setTrigger] = useState<boolean>(false)
     const [formData, setFormData] = useState<RegisterFormData>({
       name : '',
       email : '',
       password : ''
     })
-    const {response, error, loading} = useHttps({
-      path : '/register',
-      body: formData,
-      method:'POST',
-      trigger,
-      setTrigger
+    const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
+      error:null,
+      response:null,
+      loading:false
     })
+    const {error, response, loading} = httpState
+   
     const onChangeHandler = (e:any, data:any) => {
       const {name , value} = data
       setFormData((prev:RegisterFormData) => ({...prev, [name]:value}))
     }
-    const onSubmitHandler = (e:any) => {
+    const onSubmitHandler = async (e:any) => {
       e.preventDefault()
-      setTrigger(true)
+      httpDispatch({type:'LOADING'})
+      try{
+        const r = await callAPI({
+          path: '/register',
+          method : 'POST',
+          body : formData
+        })
+        httpDispatch({type:'RESPONSE', payload: r})
+      }catch(e){
+        httpDispatch({type:'ERROR',payload: e.message})
+      }
     }
 
     return (

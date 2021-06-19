@@ -5,12 +5,10 @@ export interface useHttpsProps {
     path:string,
     method:'GET' | 'POST' | 'DELETE' | 'PATCH',
     body ?: any,
-    headers ?: object,
-    trigger: boolean,
-    setTrigger : (x : boolean) => void
+    headers ?: object
 }
  
-const useHttps = ({path, method, body, headers, trigger, setTrigger}:useHttpsProps) => {
+const useHttps = ({path, method, body, headers}:useHttpsProps) => {
     const [loading, setLoading] = useState<boolean>(false)
     const [response, setResponse] = useState<any>(null)
     const [error, setError] = useState<any>(null)
@@ -42,14 +40,11 @@ const useHttps = ({path, method, body, headers, trigger, setTrigger}:useHttpsPro
                 setError(e.message)
             }finally{
                 setLoading(false)
-                setTrigger(false)
             }   
         }
-        if(trigger)
-            request()
-
+        request()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [trigger])
+    }, [])
     
     return {loading, response, error}
 }

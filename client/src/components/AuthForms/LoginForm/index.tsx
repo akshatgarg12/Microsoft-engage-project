@@ -1,9 +1,9 @@
 import { Form, FormInput, FormCheckbox, FormButton, Text } from '@fluentui/react-northstar';
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { AuthReducerActionType } from '../../../context/Auth';
 import useAuth from '../../../hooks/useAuth';
-import useHttps from '../../../hooks/useHttp';
+import { callAPI, CallAPIReducer } from '../../../utils/http';
 
 interface LoginFormData{
   email : string,
@@ -11,34 +11,40 @@ interface LoginFormData{
 }
 
 const LoginForm = ():JSX.Element | null => {
-  const [trigger, setTrigger] = useState<boolean>(false)
   const [formData, setFormData] = useState<LoginFormData>({
     email : '',
     password : ''
   })
+  const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
+    error:null,
+    response:null,
+    loading:false
+  })
+  const {error, response, loading} = httpState
   const {dispatch} = useAuth()
   const history = useHistory()
-  const {response,error,loading} = useHttps({
-      path:'/login',
-      method:'POST',
-      body:formData,
-      trigger, 
-      setTrigger
-  })
   const onChangeHandler = (e:any, data:any) => {
     const {name, value} = data
     setFormData((prev:LoginFormData) => ({...prev, [name]:value}))
   }
-  const onSubmitHandler = (e:any) => {
+  const onSubmitHandler = async (e:any) => {
     e.preventDefault()
-    setTrigger(true)
+    httpDispatch({type:'LOADING'})
+    try{
+      const r = await callAPI({
+        path: '/login',
+        method : 'POST',
+        body : formData
+      })
+      httpDispatch({type:'RESPONSE', payload: r})
+      dispatch({type : AuthReducerActionType.LOGIN, payload : r.user})
+      history.push('/')
+      return null
+    }catch(e){
+      httpDispatch({type:'ERROR',payload: e.message})
+    }
   }
-  if(response){
-    // set the user login and push to dashboard
-    dispatch({type : AuthReducerActionType.LOGIN, payload : response.user})
-    history.push('/')
-    return null
-  }
+ 
   return(
     <Form
       style={{

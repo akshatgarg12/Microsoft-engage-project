@@ -1,11 +1,13 @@
-import mongoose from 'mongoose'
+import mongoose, { ObjectId } from 'mongoose'
+const ObjectId = mongoose.Schema.Types.ObjectId
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 
 interface User{
     name : string,
     email : string,
-    password : string
+    password : string,
+    teams : Array<ObjectId>
 }
 
 const UserSchema = new mongoose.Schema<User>({
@@ -29,6 +31,10 @@ const UserSchema = new mongoose.Schema<User>({
         type:String,
         required: [true, 'User password required'],
     },
+    teams:{
+        type:[{type : ObjectId, ref: 'Team'}],
+        default:[],
+    }
 })
 
 const SALT_WORK_FACTOR = 9;
