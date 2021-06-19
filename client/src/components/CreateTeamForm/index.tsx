@@ -9,12 +9,13 @@ export interface CreateTeamFormProps {
 }
 export interface CreateTeamFormData{
     name : string,
-    members : Set<string>
+    members : Array<string>
 }
+const setOfMembers = new Set<string>()
 const CreateTeamForm = ():JSX.Element => {
     const [formData, setFormData] = useState<CreateTeamFormData>({
         name : '',
-        members : new Set()
+        members :[]
     })
     const history = useHistory()
     const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
@@ -32,16 +33,18 @@ const CreateTeamForm = ():JSX.Element => {
         const {value} = data
         setMember(value)
     }   
-    const onMemberAdd = () => {
+    const onMemberAdd = (e:any) => {
+        e.preventDefault()
         if(member !== '' && member){
-            setFormData(prev => ({...prev, members : prev.members.add(member)}))
+            setOfMembers.add(member)
+            setFormData(prev => ({...prev, members : Array.from(setOfMembers)}))
             setMember('')
         }
     }
     const onMemberRemove = (member:string) => {
-        let newMemberSet = formData.members
-        newMemberSet.delete(member)
-        setFormData(prev => ({...prev, members : newMemberSet}))
+        setOfMembers.delete(member)
+        console.log(setOfMembers)
+        setFormData(prev => ({...prev, members : Array.from(setOfMembers)}))
     }
     const onSubmitHandler = async (e:any) => {
         e.preventDefault()
@@ -78,7 +81,7 @@ const CreateTeamForm = ():JSX.Element => {
           {
                 Array.from(formData.members).map((member:string) => {
                     return (
-                        <Flex vAlign="center" space="between">
+                        <Flex vAlign="center" space="between" key={member}>
                             <Text content = {member} />
                             <Button onClick={() => onMemberRemove(member)} icon={<CloseIcon />} text />
                         </Flex>

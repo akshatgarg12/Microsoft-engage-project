@@ -29,7 +29,14 @@ const Dashboard = (): JSX.Element => {
            <Flex wrap style={{width:'90%', maxWidth:'800px', margin:'auto'}}>
                 {   
                     response && response.teams.map(((team:any,idx:number) => {
-                        return <TeamCard key={idx} />
+                        return (
+                                <TeamCard 
+                                    key={team._id} 
+                                    teamId = {team._id}
+                                    name = {team.name}
+                                    creator = {team.creator}
+                                />
+                                )
                     }))
                 }
            </Flex>
