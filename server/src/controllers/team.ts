@@ -32,7 +32,18 @@ const createTeam = async (req:Request, res:Response) => {
     }
 }
 
+const getTeam = async (req:Request, res:Response) => {
+    try{
+        const {id} = req.params
+        const team = await Team.findOne({_id : id}).populate('members creator', 'name')
+        res.status(200).json({status:'200', log:'Team fetched successfully', team})
+    }catch(e){
+        console.error(e)
+        res.status(500).json({status:'500', log:'server error, try again later'})
+    }  
+}
 export {
     getTeams,
-    createTeam
+    createTeam,
+    getTeam
 }

@@ -30,7 +30,7 @@ const TeamCard = ({teamId, name, creator}:TeamCardProps):JSX.Element => {
         </Card.Header>
         <Card.Body>
             {/* A random image */}
-            <Image src="https://fabricweb.azureedge.net/fabric-website/assets/images/wireframe/square-image.png" fluid />
+            <Image src="https://picsum.photos/200?grayscale" fluid />
         </Card.Body>
     </Card>
     )
