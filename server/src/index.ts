@@ -13,6 +13,9 @@ import isAuthenticated from './middleware/auth'
 const app = express()
 const PORT = Number(process.env.PORT) || 8080
 const server = http.createServer(app)
+import cookie from 'cookie'
+import {getUserFromCookie} from './middleware/auth'
+import { close } from 'fs'
 
 config()
 const RL = new RequestLogger({showLatestFirst:true, ignore_urls:['/sockets']})
@@ -34,7 +37,7 @@ app.use(function (req, res, next) {
 app.use(
   cors({
     credentials: true,
-    origin: true,
+    origin: 'http://localhost:3000',
   })
 );
 app.set("trust proxy", 1);
@@ -55,16 +58,32 @@ io.attach(server, {
     pingTimeout: 5000,
     cookie: true,
     cors:{
-      origin:'*'
-    }
+      origin:'http://localhost:3000',
+      methods: ["GET", "POST"],
+      credentials: true
+    },
 });
+
 
 
 const users:any = {};
 
 const socketToRoom:any = {};
-
+io.use(async (socket, next) => {
+  const cookies = cookie.parse(socket.handshake.headers.cookie || '')
+  const user = cookies.user
+  const userData = await getUserFromCookie(user)
+  if(!userData){
+    socket.emit('unauthorized', {id : socket.id})
+    next(new Error("user not authorized"));
+  }
+  // @ts-ignore
+  socket.user = userData
+  next()
+})
 io.on('connection', socket => {
+  // @ts-ignore
+    // console.log(socket.user)
     socket.on("join room", roomID => {
       /*
        1. find if the room exists and is acitve 

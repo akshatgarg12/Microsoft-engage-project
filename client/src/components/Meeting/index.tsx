@@ -126,17 +126,20 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
     }
 
     return (
-        <Flex wrap className={classes.container}>
-            <video className={classes.styledVideo} autoPlay ref = {userVideo} />
-            {
-                peers.map((peer:any, index : any) => {
-                    return <Video key = {index} peer = {peer} />
-                })
-            }
+        <>
+            <Flex wrap className={classes.container}>
+                <video className={classes.styledVideo} autoPlay ref = {userVideo} />
+                {
+                    peers.map((peer:any, index : any) => {
+                        return <Video key = {index} peer = {peer} />
+                    })
+                }
+                
+            </Flex>
             <Prompt
                 when={true}
                 message="Are you sure you want to leave?" />
-        </Flex>
+        </>
 
     );
 }
