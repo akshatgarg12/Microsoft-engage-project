@@ -1,13 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useRef, useState } from "react";
-import { useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import {Prompt, useHistory} from 'react-router-dom'
 import {Flex} from '@fluentui/react-northstar'
 import socket from '../../config/socket'
 import Peer from "simple-peer";
 import classes from './style.module.css'
-
 export interface MeetingProps {
-    
+    meetingId : string
 }
 const Video = (props:any) => {
 
@@ -29,13 +28,19 @@ const videoConstraints = {
     width: window.innerWidth / 2
 };
 
-const Meeting = (): JSX.Element => {
+const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
+    /* 
+        1. first check whether the meeting exists and is active.
+        2. get All current users through socket
+        3. Handle on close and refresh events.
+    */
+ 
     const [peers, setPeers] = useState<Array<any>>([]);
     const socketRef = useRef(socket);
     const userVideo = useRef<HTMLVideoElement>(null);
     const peersRef = useRef<Array<any>>([]);
-    const roomID ='123456';
-
+    const roomID = meetingId;
+    const history = useHistory()
     useEffect(() => {
         // connect socket
         socketRef.current.connect()
@@ -76,6 +81,19 @@ const Meeting = (): JSX.Element => {
                 item.peer.signal(payload.signal);
             });
         })
+        // stops to reload if done by mistake
+        function confirmExit(){
+            // eslint-disable-next-line no-restricted-globals
+            const exit = confirm("Are you sure you want to reload?")
+            if(exit){
+                // leave meeting
+                history.push('/')
+            }else{
+                console.log('unload event unmount')
+            }
+            return "";
+        }
+        window.onbeforeunload = confirmExit;
     }, []);
 
     function createPeer(userToSignal:any, callerID:any, stream:any) {
@@ -115,6 +133,9 @@ const Meeting = (): JSX.Element => {
                     return <Video key = {index} peer = {peer} />
                 })
             }
+            <Prompt
+                when={true}
+                message="Are you sure you want to leave?" />
         </Flex>
 
     );

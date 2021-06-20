@@ -23,6 +23,12 @@ const MeetingSchema = new mongoose.Schema<Meeting>({
        required: [true, 'meeting must have a creator']
    },
    attendedBy : [{type : ObjectId, ref: 'User'}],
+   inMeeting : [{type : ObjectId, ref: 'User'}],
+   active:{
+       type:Boolean,
+       required: [true, 'meeting must have a state'],
+       default : true
+   }
 },{
     timestamps:true
 })

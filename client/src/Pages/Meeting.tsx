@@ -4,9 +4,10 @@ export interface MeetingPageProps {
     
 }
  
-const MeetingPage = ():JSX.Element => {
+const MeetingPage = (props:any):JSX.Element => {
+    const {id} = props.match.params
     return (
-        <Meeting />
+        <Meeting meetingId = {id} />
     );
 }
  

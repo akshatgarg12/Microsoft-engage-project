@@ -12,12 +12,15 @@ import TeamPage from './Pages/TeamPage';
 const App = ():JSX.Element  => {
   return (
     <>
-      <Router>
+      <Router getUserConfirmation={(message, callback) => {
+        const allowTransition = window.confirm(message);
+        callback(allowTransition);
+      }}>
         <Navbar />
           <Switch>
             <Route  path = '/auth' component={AuthPage} />
             <ProtectedRoute path = '/' component={Dashboard} exact = {true} />
-            <ProtectedRoute path = '/meeting' component={MeetingPage} />
+            <ProtectedRoute path = '/meeting/:id' component={MeetingPage} />
             <ProtectedRoute exact path = '/team/create' component={CreateTeamPage} />
             <ProtectedRoute path = '/team/:id' component={TeamPage} />
           </Switch>

@@ -44,7 +44,7 @@ const TeamPage = (props:any):JSX.Element => {
                 onActiveIndexChange={(e, data) => setIndex(Number(data?.activeIndex) || 0)}
             />
             {
-                index === 0 && <CreateMeeting />   
+                index === 0 && <CreateMeeting teamId={id} />   
             }
             {
                  index === 2 && <Members members={response.team.members} />

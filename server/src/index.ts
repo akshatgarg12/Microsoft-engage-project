@@ -66,6 +66,13 @@ const socketToRoom:any = {};
 
 io.on('connection', socket => {
     socket.on("join room", roomID => {
+      /*
+       1. find if the room exists and is acitve 
+       2. inMembers of room
+       3. Add when a new user joins
+       4. Remove when a user leaves 
+       5. End the meeting event , set the active to false and remove all users
+      */
         if (users[roomID]) {
             const length = users[roomID].length;
             if (length === 4) {
