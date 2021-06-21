@@ -53,11 +53,13 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             // get all users in the room
             socketRef.current.on("all users", users => {
                 const peers:any = [];
-                users.forEach((userID:string) => {
+                console.log(users)
+                users.forEach((user:any) => {
+                    const {socketId} = user;
                     // create peer of all members by sending signal 
-                    const peer = createPeer(userID, socketRef.current.id, stream);
+                    const peer = createPeer(socketId, socketRef.current.id, stream);
                     peersRef.current.push({
-                        peerID: userID,
+                        peerID: socketId,
                         peer,
                     })
                     peers.push(peer);
@@ -66,6 +68,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             })
             // when new user joins, wait for their signal and then accept and return an answer
             socketRef.current.on("user joined", payload => {
+                console.log(payload)
                 const peer = addPeer(payload.signal, payload.callerID, stream);
                 peersRef.current.push({
                     peerID: payload.callerID,

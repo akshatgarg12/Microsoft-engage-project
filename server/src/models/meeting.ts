@@ -7,7 +7,20 @@ interface Meeting{
     creator : ObjectId,
     attendedBy : Array<ObjectId>,
 }
-
+interface inMeeting{
+    socketId: string,
+    userId: ObjectId
+}
+const inMeetingSchema = new mongoose.Schema<inMeeting>({
+    socketId : {
+        type:String,
+        required:true
+    },
+    userId:{
+        type:ObjectId,
+        ref : 'User',
+    }
+})
 const MeetingSchema = new mongoose.Schema<Meeting>({
    title:{
        type:String,
@@ -23,7 +36,10 @@ const MeetingSchema = new mongoose.Schema<Meeting>({
        required: [true, 'meeting must have a creator']
    },
    attendedBy : [{type : ObjectId, ref: 'User'}],
-   inMeeting : [{type : ObjectId, ref: 'User'}],
+   inMeeting : {
+       type : [inMeetingSchema],
+       default: []
+   },
    active:{
        type:Boolean,
        required: [true, 'meeting must have a state'],
