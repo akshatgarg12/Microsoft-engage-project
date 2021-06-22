@@ -9,16 +9,23 @@ export interface MeetingProps {
     meetingId : string
 }
 const Video = (props:any) => {
-
     const videoRef = useRef<HTMLVideoElement>(null)
+    const [error,setError] = useState(false)
     useEffect(()=>{
         props.peer.on("stream", (stream:any) => {
             if(videoRef.current)
                 videoRef.current.srcObject = stream
         })
+        props.peer.on('error', () => {
+            setError(true)
+        })
     }, [])
+    if(error) return null
     return (
-        <video muted={true} className={classes.styledVideo} ref={videoRef} autoPlay />
+        <div style={{background:'red', margin:'10px'}}>
+            <video muted={true} className={classes.styledVideo} ref={videoRef} autoPlay />
+            <div>{props.info.userId}</div>
+        </div>
     )
 
 }
@@ -49,6 +56,12 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                 userVideo.current.srcObject = stream;
             // emit signal to join room
             socketRef.current.emit("join-meeting", meetingId);
+            // if auth error
+            socketRef.current.on("user-auth-fail", (payload) => {
+                // push user back to dashboard
+                socketRef.current.disconnect()
+                history.push('/')
+            })
             // get all users in the room
             socketRef.current.on("meeting-members", (payload : any) => {
                 const {members, from} = payload
@@ -62,7 +75,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                         peerID: socketId,
                         peer,
                     })
-                    peers.push(peer);
+                    peers.push({peer, info : to});
                 })
                 setPeers(peers);
             })
@@ -70,12 +83,20 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             socketRef.current.on("user-offer", payload => {
                 const {signal, from, to} = payload
                 const peer = sendAnswer(signal, from, to, stream);
+                // remove the one with socketId which has been destroyed
                 peersRef.current.push({
                     peerID: from.socketId,
                     peer,
                 })
-
-                setPeers(users => [...users, peer]);
+                // const updatedPeers = [...peers].filter((p) =>{ 
+                //     if(p.info.userId === from.userId) p.peer.destroy()
+                //     return  p.info.userId !== from.userId
+                // })
+                // console.log(updatedPeers)
+                // updatedPeers.push({peer, info : from})
+                // console.log(updatedPeers)
+                // setPeers(updatedPeers)
+                setPeers((prev) => ([...prev, {peer, info:from}]))
             });
 
             socketRef.current.on("receive-answer", payload => {
@@ -84,6 +105,25 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                 const item = peersRef.current.find(p => p.peerID === from.socketId);
                 item.peer.signal(signal);
             });
+            socketRef.current.on("leave-meeting" , (payload) => {
+                const socketId = socketRef.current.id
+                peersRef.current.forEach((peer) => {
+                    socketRef.current.emit("leaving", {from:socketId,to:peer.peerID})
+                })
+            })
+            socketRef.current.on("leaving" , payload => {
+                const {from} = payload
+                peersRef.current = peersRef.current.filter((p) => {
+                   if(p.peerID === from) p.peer.destroy()
+                   return p.peerID !== from
+                })
+                // remove from peer array aswell
+                const newPeerArray = [...peers].filter((p) => {
+                    if(p.info.socketId === from) p.peer.destroy()
+                    return p.info.socketId !== from
+                })
+                setPeers(newPeerArray)
+            })
         })
         // stops to reload if done by mistake
         function confirmExit(){
@@ -97,7 +137,13 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             }
             return "";
         }
+        function DestroyConnections(){
+            socketRef.current.emit('leaving-meeting')
+        }
         window.onbeforeunload = confirmExit;
+        window.onunload = DestroyConnections;
+        window.onclose = DestroyConnections;
+        console.log(peers)
     }, []);
 
     function sendOffer(to:any, from:any, stream:any) {
@@ -128,15 +174,13 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         })       
         return peer;
     }
-
+    console.log(peers)
     return (
         <>
             <Flex wrap className={classes.container}>
                 <video className={classes.styledVideo} autoPlay ref = {userVideo} />
                 {
-                    peers.map((peer:any, index : any) => {
-                        return <Video key = {index} peer = {peer} />
-                    })
+                    peers.map((value:any, index : any) => <Video key = {index} peer = {value.peer} info = {value.info} />)
                 }
                 
             </Flex>

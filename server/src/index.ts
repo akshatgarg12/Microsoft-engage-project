@@ -66,10 +66,6 @@ io.attach(server, {
 });
 
 
-
-const users:any = {};
-
-const socketToRoom:any = {};
 io.use(async (socket, next) => {
   const cookies = cookie.parse(socket.handshake.headers.cookie || '')
   const user = cookies.user
@@ -89,18 +85,34 @@ io.on('connection', socket => {
     socket.on('join-meeting', async (meetingId) => {
       // find if meeting exists and is active
       try{
+        if(!user){
+          socket.emit('user-auth-fail')
+          socket.disconnect(true)
+        }
         const meeting = await Meeting.findOne({_id : meetingId})
         if(meeting){
-          if(meeting.active === true){
+          if(meeting.active){
             // find the users in the meeting
-            const members = meeting.inMeeting
             // send the meeting members to the new user who joined
             const from = {
               socketId, 
               userId : user._id
             }
-            meeting.inMeeting = [...meeting.inMeeting, from]
-            await meeting.save()
+            let n = meeting.inMeeting.length
+            let userAlreadyInMeet = false
+            for(let i = 0; i < n; i++){
+              let member = meeting.inMeeting[i]
+              if(String(member.userId) === String(user._id)){
+                  // destroy this socketId and its peer conn
+                  io.to(meeting.inMeeting[i].socketId).emit("leave-meeting");
+                  meeting.inMeeting[i].socketId = socketId
+                  userAlreadyInMeet = true
+                  break
+                }
+            }
+            if(!userAlreadyInMeet)
+              meeting.inMeeting = [...meeting.inMeeting, from]
+            const members = meeting.inMeeting.filter((mem:any) => String(mem.userId) !== String(user._id))
             socket.emit('meeting-members',{ members, from})
             socket.on('sending-signal', payload => {
               const {to, from, signal} = payload
@@ -110,6 +122,15 @@ io.on('connection', socket => {
               const {signal, to, from} = payload
               io.to(to.socketId).emit('receive-answer', {signal, from})
             })
+            socket.on("leaving", async (payload) => {
+              const {from, to} = payload
+              meeting.inMeeting = meeting.inMeeting.filter((mem:any) => mem.socketId !== from)
+              io.to(to).emit("leaving", {from})
+            })
+            socket.on("leaving-meeting", () => {
+              socket.emit('leave-meeting')
+            })
+            await meeting.save()
           }else{
             socket.emit('meeting-ended', 'Error: 400, Meeting has already ended')
           }
@@ -117,6 +138,7 @@ io.on('connection', socket => {
           socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
         }
       }catch(e){
+        console.error(e)
         socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
       }
     })
