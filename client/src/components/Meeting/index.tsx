@@ -39,7 +39,6 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
     const socketRef = useRef(socket);
     const userVideo = useRef<HTMLVideoElement>(null);
     const peersRef = useRef<Array<any>>([]);
-    const roomID = meetingId;
     const history = useHistory()
     useEffect(() => {
         // connect socket
@@ -49,15 +48,16 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             if(userVideo.current)
                 userVideo.current.srcObject = stream;
             // emit signal to join room
-            socketRef.current.emit("join room", roomID);
+            socketRef.current.emit("join-meeting", meetingId);
             // get all users in the room
-            socketRef.current.on("all users", users => {
+            socketRef.current.on("meeting-members", (payload : any) => {
+                const {members, from} = payload
+                console.log(payload)
                 const peers:any = [];
-                console.log(users)
-                users.forEach((user:any) => {
-                    const {socketId} = user;
+                members && members.forEach((to:any) => {
+                    const {socketId} = to;
                     // create peer of all members by sending signal 
-                    const peer = createPeer(socketId, socketRef.current.id, stream);
+                    const peer = sendOffer(to, from, stream);
                     peersRef.current.push({
                         peerID: socketId,
                         peer,
@@ -67,21 +67,22 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                 setPeers(peers);
             })
             // when new user joins, wait for their signal and then accept and return an answer
-            socketRef.current.on("user joined", payload => {
-                console.log(payload)
-                const peer = addPeer(payload.signal, payload.callerID, stream);
+            socketRef.current.on("user-offer", payload => {
+                const {signal, from, to} = payload
+                const peer = sendAnswer(signal, from, to, stream);
                 peersRef.current.push({
-                    peerID: payload.callerID,
+                    peerID: from.socketId,
                     peer,
                 })
 
                 setPeers(users => [...users, peer]);
             });
 
-            socketRef.current.on("receiving returned signal", payload => {
+            socketRef.current.on("receive-answer", payload => {
+                const {signal, from} = payload
                 // check who sent the signal and accept it.(completes the handshake and establishes conn)
-                const item = peersRef.current.find(p => p.peerID === payload.id);
-                item.peer.signal(payload.signal);
+                const item = peersRef.current.find(p => p.peerID === from.socketId);
+                item.peer.signal(signal);
             });
         })
         // stops to reload if done by mistake
@@ -99,7 +100,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         window.onbeforeunload = confirmExit;
     }, []);
 
-    function createPeer(userToSignal:any, callerID:any, stream:any) {
+    function sendOffer(to:any, from:any, stream:any) {
         const peer = new Peer({
             initiator: true,
             trickle: false,
@@ -107,23 +108,23 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         });
         // immediately fires off and sends offer to users in room
         peer.on("signal", signal => {
-            socketRef.current.emit("sending signal", { userToSignal, callerID, signal })
+            socketRef.current.emit("sending-signal", { to, from, signal})
         })
 
         return peer;
     }
 
-    function addPeer(incomingSignal:any, callerID:any, stream:any) {
+    function sendAnswer(offer:any, from:any, to:any,  stream:any) {
         const peer = new Peer({
             initiator: false,
             trickle: false,
             stream,
         })
         // accept the incoming signal
-        peer.signal(incomingSignal);
+        peer.signal(offer);
         // fires off after incoming signal
         peer.on("signal", signal => {
-            socketRef.current.emit("returning signal", { signal, callerID })
+            socketRef.current.emit("user-answer", { signal, to:from, from:to })
         })       
         return peer;
     }

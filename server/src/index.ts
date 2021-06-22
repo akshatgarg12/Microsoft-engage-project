@@ -86,41 +86,41 @@ io.on('connection', socket => {
     //@ts-ignore
     const user = socket.user
     const socketId = socket.id
-    socket.on("join room", async (roomID) => {
-      const meet = await Meeting.findOne({_id : roomID})
-      if(meet){
-        if(meet.active){
-            meet.inMeeting = [...meet.inMeeting, {userId : user._id, socketId}]
-            await meet.save()
-            // console.log(meet)
-            const otherUsers = meet.inMeeting.filter((us:any) => us.userId !== user._id)
-            // send other users id
-            socket.emit("all users", otherUsers);
-            // socket id is required here
-            socket.on("sending signal", payload => {
-              io.to(payload.userToSignal).emit('user joined', { signal: payload.signal, callerID: payload.callerID });
-            });
-        
-            socket.on("returning signal", payload => {
-                io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socketId});
-            });
-        
-            socket.on('disconnect', () => {
-                const roomID = socketToRoom[socket.id];
-                let room = users[roomID];
-                if (room) {
-                    room = room.filter((id:any) => id !== socket.id);
-                    users[roomID] = room;
-                }
-            });
-        }else{
-            // send error
-            socket.emit("meeting ended", 'Meeting has ended')
+    socket.on('join-meeting', async (meetingId) => {
+      // find if meeting exists and is active
+      try{
+        const meeting = await Meeting.findOne({_id : meetingId})
+        if(meeting){
+          if(meeting.active === true){
+            // find the users in the meeting
+            const members = meeting.inMeeting
+            // send the meeting members to the new user who joined
+            const from = {
+              socketId, 
+              userId : user._id
+            }
+            meeting.inMeeting = [...meeting.inMeeting, from]
+            await meeting.save()
+            socket.emit('meeting-members',{ members, from})
+            socket.on('sending-signal', payload => {
+              const {to, from, signal} = payload
+              io.to(to.socketId).emit('user-offer', {signal, from, to})
+            })
+            socket.on('user-answer', payload => {
+              const {signal, to, from} = payload
+              io.to(to.socketId).emit('receive-answer', {signal, from})
+            })
+          }else{
+            socket.emit('meeting-ended', 'Error: 400, Meeting has already ended')
           }
         }else{
-          socket.emit("meeting not found", 'Cannot find the Meeting.')
-          // send error
+          socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
+        }
+      }catch(e){
+        socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
       }
+    })
+    
       /*  
        1. find if the room exists and is acitve 
        2. inMembers of room
@@ -128,10 +128,6 @@ io.on('connection', socket => {
        4. Remove when a user leaves 
        5. End the meeting event , set the active to false and remove all users
       */
-    });
-
-    
-
 });
 
 
