@@ -88,6 +88,16 @@ const currentUser = (req:Request, res:Response) => {
     const {user} = req
     res.status(200).json({status:'200', log:'current user info', user})
 }
+const getUser = async (req:Request, res:Response) => {
+    try{
+        const {_id} = req.params
+        const user = await User.findOne({_id}).select('name')
+        res.status(200).json({status:'200', log:'user info', user})
+    }catch(e){
+        res.status(500).json({status:'500', log:e.message})
+    }
+}
+
 const logout = (req:Request, res:Response) => {
     res.clearCookie('user')
     res.status(200).json({status:'200',log:'user logged out'})
@@ -96,5 +106,6 @@ export {
     login,
     register,
     currentUser,
-    logout
+    logout,
+    getUser
 }
