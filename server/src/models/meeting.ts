@@ -5,7 +5,7 @@ interface Meeting{
     title : string,
     createdAt : Date,
     creator : ObjectId,
-    attendedBy : Array<ObjectId>,
+    attendedBy : ObjectId[],
 }
 interface inMeeting{
     socketId: string,

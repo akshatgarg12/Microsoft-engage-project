@@ -16,7 +16,7 @@ export const getUserFromCookie = async (user:string) => {
             // @ts-ignore
             return userData
         }else{
-            return null    
+            return null
         }
     }catch(e){
         return null

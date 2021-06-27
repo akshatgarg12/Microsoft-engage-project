@@ -33,14 +33,14 @@ describe('Database Test Suite', () => {
             expect(user.password).to.not.equal('test123')
         })
     })
-    
+
     describe('Team Test Suite' , () => {
         it('creates a new team', async function (){
            const team = new Team({name : 'test-team', creator : userId})
            const doc = await team.save()
            teamId = doc._id
         });
-        
+
         it('fetch team and check for members', async function(){
             const team = await Team.findOne({_id : teamId})
             expect(team.name).to.equal('test-team')
@@ -48,24 +48,24 @@ describe('Database Test Suite', () => {
             expect(team.members).length(1)
             expect(String(team.members[0])).to.equal(String(userId))
         })
-        
+
     })
 
     describe('Meeting Test Suite' , () => {
         it('creates a new meeting', async function (){
-           const meeting = new Meeting({title : 'test-meet', creator : userId, teamId: teamId})
+           const meeting = new Meeting({title : 'test-meet', creator : userId, teamId})
            const doc = await meeting.save()
            meetingId = doc._id
         });
-        
+
         it('fetch meeting', async function(){
-            const meeting = await Meeting.findOne({_id : meetingId})    
+            const meeting = await Meeting.findOne({_id : meetingId})
             expect(meeting.title).to.equal('test-meet')
             expect(String(meeting.creator)).to.equal(String(userId))
             expect(meeting.attendedBy).to.deep.equal([])
             expect(String(meeting.teamId)).to.equal(String(teamId))
         })
-        
+
     })
     describe('Delete Entities', () => {
         it('deletes the user', async function () {
@@ -78,5 +78,5 @@ describe('Database Test Suite', () => {
             await Meeting.deleteOne({_id : meetingId});
         })
     })
-    
+
 })

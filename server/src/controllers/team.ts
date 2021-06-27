@@ -43,7 +43,7 @@ const getTeam = async (req:Request, res:Response) => {
     }catch(e){
         console.error(e)
         res.status(500).json({status:'500', log:'server error, try again later'})
-    }  
+    }
 }
 export {
     getTeams,
