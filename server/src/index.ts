@@ -57,7 +57,7 @@ io.attach(server, {
     pingTimeout: 5000,
     cookie: true,
     cors:{
-      origin:'http://localhost:3000',
+      origin:true,
       methods: ["GET", "POST"],
       credentials: true
     },
@@ -76,10 +76,26 @@ io.use(async (socket, next) => {
   socket.user = userData
   next()
 })
+
+const SOCKET_MAP:any = {}
+
 io.on('connection', socket => {
+    // store userId and socketId in a map to send notifications
     // @ts-ignore
     const user = socket.user
+    if(user){
+      SOCKET_MAP[user.email] = socket.id
+    }
     const socketId = socket.id
+    
+    socket.on('send-notification', (payload) => {
+      const {to, info} = payload
+      if(SOCKET_MAP[to]){
+        const socketIdToNotify = SOCKET_MAP[to]
+        io.to(socketIdToNotify).emit('notification', info)
+      }
+    })
+
     socket.on('join-meeting', async (meetingId) => {
       // find if meeting exists and is active
       try{
@@ -140,7 +156,7 @@ io.on('connection', socket => {
         socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
       }
     })
-
+    
       /*
        1. find if the room exists and is acitve
        2. inMembers of room
