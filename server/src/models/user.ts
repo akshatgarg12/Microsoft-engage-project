@@ -7,7 +7,7 @@ interface User{
     name : string,
     email : string,
     password : string,
-    teams : Array<ObjectId>
+    teams : ObjectId[]
 }
 
 const UserSchema = new mongoose.Schema<User>({
@@ -40,7 +40,7 @@ const UserSchema = new mongoose.Schema<User>({
 const SALT_WORK_FACTOR = 9;
 
 UserSchema.pre('save', function(next) {
-    var user = this;
+    let user = this;
     if (!user.isModified('password')) return next();
     bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
         if (err) return next(err);

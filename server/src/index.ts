@@ -5,7 +5,6 @@ import {Server} from 'socket.io'
 import API from './routes'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import {RequestLogger} from 'reqlogs'
 import { config } from "dotenv"
 import {__prod__} from './constants'
 import DatabaseConnection from './config/mongodb'
@@ -16,10 +15,10 @@ const server = http.createServer(app)
 import cookie from 'cookie'
 import {getUserFromCookie} from './middleware/auth'
 import Meeting from './models/meeting'
-import User from './models/user'
+
 
 config()
-const RL = new RequestLogger({showLatestFirst:true, ignore_urls:['/sockets']})
+
 // cookies
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Credentials", 'true');
@@ -38,14 +37,13 @@ app.use(function (req, res, next) {
 app.use(
   cors({
     credentials: true,
-    origin: 'http://localhost:3000',
+    origin: true,
   })
 );
 app.set("trust proxy", 1);
+app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(cookieParser());
-app.use(RL.Webpage({url : '/logs'}))
 app.use('/api',API)
 app.get('/', isAuthenticated, (req:Request, res:Response) => {
   res.send("Hello World")
@@ -79,7 +77,7 @@ io.use(async (socket, next) => {
   next()
 })
 io.on('connection', socket => {
-    //@ts-ignore
+    // @ts-ignore
     const user = socket.user
     const socketId = socket.id
     socket.on('join-meeting', async (meetingId) => {
@@ -95,13 +93,13 @@ io.on('connection', socket => {
             // find the users in the meeting
             // send the meeting members to the new user who joined
             const from = {
-              socketId, 
+              socketId,
               userId : user._id
             }
-            let n = meeting.inMeeting.length
+            const n = meeting.inMeeting.length
             let userAlreadyInMeet = false
             for(let i = 0; i < n; i++){
-              let member = meeting.inMeeting[i]
+              const member = meeting.inMeeting[i]
               if(String(member.userId) === String(user._id)){
                   // destroy this socketId and its peer conn
                   io.to(meeting.inMeeting[i].socketId).emit("leave-meeting");
@@ -138,16 +136,16 @@ io.on('connection', socket => {
           socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
         }
       }catch(e){
-        console.error(e)
+        // console.error(e)
         socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
       }
     })
-    
-      /*  
-       1. find if the room exists and is acitve 
+
+      /*
+       1. find if the room exists and is acitve
        2. inMembers of room
        3. Add when a new user joins
-       4. Remove when a user leaves 
+       4. Remove when a user leaves
        5. End the meeting event , set the active to false and remove all users
       */
 });
@@ -159,7 +157,7 @@ const serverStart = async () => {
     server.listen(PORT, () => {
       console.log(`server running at port:${PORT}`)
     })
-    
+
   }catch(e){
     console.error(e)
   }

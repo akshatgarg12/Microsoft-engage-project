@@ -1,81 +1,34 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { useRef, useState, useEffect, useReducer } from "react";
+import { useRef, useState, useEffect } from "react";
 import {Prompt, useHistory} from 'react-router-dom'
 import {Button, Flex} from '@fluentui/react-northstar'
 import socket from '../../config/socket'
 import Peer from "simple-peer";
 import classes from './style.module.css'
-import { callAPI, CallAPIReducer } from "../../utils/http";
-import { useCallback } from "react";
+import PeerVideo from "../PeerVideo";
 export interface MeetingProps {
     meetingId : string
 }
-const Video = (props:any) => {
-    const videoRef = useRef<HTMLVideoElement>(null)
-    const [peerError,setPeerError] = useState(false)
-    const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
-        response : null,
-        loading : false,
-        error: null
-    })
-    const {response} = httpState
-    const getUserDetails = useCallback(async () => {
-        try{
-            httpDispatch({type : 'LOADING'})
-            const r = await callAPI({
-                path : '/user/' + props.info.userId,
-                method : 'GET',
-            })
-            console.log(r)
-            httpDispatch({type : 'RESPONSE', payload : r.user.name})    
-        }catch(e){
-            console.error(e)
-            httpDispatch({type : 'ERROR', payload : e.message})
-        }
-    }, [props])
 
-    useEffect(()=>{
-        getUserDetails()
-        props.peer.on("stream", (stream:any) => {
-            if(videoRef.current)
-                videoRef.current.srcObject = stream
-        })
-        props.peer.on('error', (e:any) => {
-            console.log(e)
-            setPeerError(true)
-        })
-        props.peer.on('close', () => {
-            setPeerError(true)
-        })
-        if(props.peer.destroyed) setPeerError(true)
-    }, [])
-    if(peerError) return null
-    return (
-        <div style={{background:'red', margin:'10px'}}>
-            <video muted={true} className={classes.styledVideo} ref={videoRef} autoPlay />
-            <div>{response && response}</div>
-        </div>
-    )
-
-}
 const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
     /* 
         1. first check whether the meeting exists and is active.
         2. get All current users through socket
         3. Handle on close and refresh events.
+        4. If the person is the creator of meeting, give an option to end the meeting
     */
- 
+  
     const [peers, setPeers] = useState<Array<any>>([]);
-    const socketRef = useRef(socket);
-    const userVideo = useRef<HTMLVideoElement>(null);
     const [userLeft, setUserLeft] = useState(false)
-    const peersRef = useRef<Array<any>>([]);
-    const history = useHistory()
     const [streamOptions, setStreamOptions] = useState({
         video : true,
         audio : false
     })
-    const [userStream, setUserStream] = useState<MediaStream | null>(null)
+    const userStream = useRef<MediaStream | null>(null)
+    const socketRef = useRef(socket);
+    const userVideo = useRef<HTMLVideoElement>(null);
+    const peersRef = useRef<Array<any>>([]);
+    const history = useHistory()
     
     // stops to reload if done by mistake
     function confirmExit(){
@@ -106,46 +59,37 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         }
     }
     function CloseMedia(){
-        userStream && userStream.getTracks().forEach((track) => {
+        userStream.current && userStream.current.getTracks().forEach((track) => {
             console.log(track)
             track.stop()
         })
-        setStreamOptions({video:false, audio:false})
-        setUserStream(null)
     }
     useEffect(() => {
-        const {audio, video} = streamOptions
-        if(!audio && !video){
-            if(userVideo.current)
-               userVideo.current.srcObject = null;
-            try{
-                peers.forEach(({peer}) => {
-                    if(userStream && !peer.destroyed){
-                        peer.removeStream()
-                        peer.addStream(undefined)
-                    }
-                })
-                setUserStream(null)
+        try{
+            peers.forEach(({peer}) => {
+                if(userStream.current && !peer.destroyed){
+                    peer.addStream(userStream.current)
+                }
+            })
             }catch(e){
                 // console.error(e)
             }
+    }, [userStream.current])
+
+    useEffect(() => {
+        CloseMedia()
+        const {audio, video} = streamOptions
+        if(!audio && !video){
+            if(userVideo.current){
+                userVideo.current.srcObject = null;
+            }
         }else{
+            
             navigator.mediaDevices.getUserMedia(streamOptions).then((stream) => {
                 // get this new stream and customise the stream to all peers
+                userStream.current = stream
                 if(userVideo.current)
-                   userVideo.current.srcObject = stream;
-                try{
-                    peers.forEach(({peer}) => {
-                        if(userStream && !peer.destroyed){
-                            peer.removeStream()
-                            peer.addStream(stream)
-                        }
-                    })
-                    setUserStream(stream)
-                }catch(e){
-                    // console.error(e)
-                }
-                
+                   userVideo.current.srcObject = userStream.current;
             })
         }
         
@@ -157,7 +101,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             socketRef.current.connect()
             // get user media
             navigator.mediaDevices.getUserMedia(streamOptions).then(stream => {
-                setUserStream(stream)
+                userStream.current = stream
                 if(userVideo.current)
                     userVideo.current.srcObject = stream;
                 // emit signal to join room
@@ -176,7 +120,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                     members && members.forEach((to:any) => {
                         const {socketId} = to;
                         // create peer of all members by sending signal 
-                        const peer = sendOffer(to, from, stream);
+                        const peer = sendOffer(to, from, userStream.current);
                         peersRef.current.push({
                             peerID: socketId,
                             peer,
@@ -188,7 +132,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                 // when new user joins, wait for their signal and then accept and return an answer
                 socketRef.current.on("user-offer", payload => {
                     const {signal, from, to} = payload
-                    const peer = sendAnswer(signal, from, to, stream);
+                    const peer = sendAnswer(signal, from, to, userStream.current);
                     // remove the one with socketId which has been destroyed
                     peersRef.current.push({
                         peerID: from.socketId,
@@ -202,7 +146,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                     const {signal, from} = payload
                     // check who sent the signal and accept it.(completes the handshake and establishes conn)
                     const item = peersRef.current.find(p => p.peerID === from.socketId);
-                    // if(item.peer.destroyed)
+                    // if(!item.peer.destroyed)
                         item.peer.signal(signal);
                 });
                 socketRef.current.on("leave-meeting" , (payload) => {
@@ -223,6 +167,13 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                         return p.info.socketId !== from
                     })
                     setPeers(newPeerArray)
+                })
+                socketRef.current.on('meeting-not-found', payload => {
+                    userStream.current && userStream.current.getTracks().forEach((track) => {
+                        console.log(track)
+                        track.stop()
+                    })
+                    history.push('/')
                 })
             })
             
@@ -266,15 +217,18 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
     // console.log(peers)
     return (
         <>
-            <Flex wrap className={classes.container}>
+            <Flex hAlign = "end">
                 <Button content="leave" onClick={LeaveMeeting} />
                 <Button content={streamOptions.audio ? 'Audio Off' : 'Audio On'} onClick={() => setStreamOptions((prev) => ({...prev , audio:!streamOptions.audio}))}/>
                 <Button content={streamOptions.video ? 'Video Off' : 'Video On'} onClick={() => setStreamOptions((prev) => ({...prev , video:!streamOptions.video}))}/>
-                <video className={classes.styledVideo} autoPlay ref={userVideo} />
+            </Flex>
+            <Flex hAlign="center">
+                <video className={classes.myVideo} autoPlay ref={userVideo} />
+            </Flex>
+            <Flex wrap className={classes.container}>
                 {
-                    peers.map((value:any, index : any) => <Video key = {index} peer = {value.peer} info = {value.info} />)
+                    peers.map((value:any, index : any) => <PeerVideo key = {index} peer = {value.peer} info = {value.info} />)
                 }
-                
             </Flex>
             <Prompt
                 when={!userLeft}

@@ -37,7 +37,7 @@ const login = async (req:Request, res:Response) => {
             // compare password
             const passwordMatch = await bcrypt.compare(password, user.password)
             if(passwordMatch){
-                // set cookie 
+                // set cookie
                 res.cookie("user", getToken(user._id), {
                     maxAge: OneDayInSec * 1000,
                     ...cookieConfig,
@@ -49,12 +49,12 @@ const login = async (req:Request, res:Response) => {
             }
         }else{
             res.status(404).json({status:'404', log:'User not found'})
-        } 
+        }
     }catch(e){
         console.error(e)
         res.status(500).json({status:'500', log:'Server error, try again later'})
     }
-    
+
 }
 
 const register = async (req:Request, res:Response) => {

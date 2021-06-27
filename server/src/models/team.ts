@@ -3,8 +3,8 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 interface Team{
     name : string,
     creator : ObjectId,
-    members : Array<ObjectId>,
-    meetings : Array<ObjectId>
+    members : ObjectId[],
+    meetings : ObjectId[]
 }
 
 const TeamSchema = new mongoose.Schema<Team>({
@@ -24,7 +24,7 @@ const TeamSchema = new mongoose.Schema<Team>({
 })
 
 TeamSchema.pre('save',async function(next) {
-    var team = this;
+    let team = this;
     if(!team.members) team.members = []
     if(!team.members.includes(team.creator)){
         team.members.push(team.creator)
