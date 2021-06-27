@@ -1,4 +1,5 @@
 import {Request, Response} from 'express'
+import Meeting from '../models/meeting'
 import Team from '../models/team'
 import User from '../models/user'
 
@@ -36,7 +37,9 @@ const getTeam = async (req:Request, res:Response) => {
     try{
         const {id} = req.params
         const team = await Team.findOne({_id : id}).populate('members creator', 'name')
-        res.status(200).json({status:'200', log:'Team fetched successfully', team})
+        const meetings = team.meeting
+        const meetingDetails = await Meeting.find().where('_id').in(meetings).populate('creator attendedBy', 'name').exec()
+        res.status(200).json({status:'200', log:'Team fetched successfully', team, meetings: meetingDetails})
     }catch(e){
         console.error(e)
         res.status(500).json({status:'500', log:'server error, try again later'})

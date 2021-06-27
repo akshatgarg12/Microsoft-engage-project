@@ -2,14 +2,16 @@ import {Menu, Flex} from '@fluentui/react-northstar'
 import { useState } from 'react';
 import CreateMeeting from '../components/CreateMeeting'
 import Members from '../components/Members'
+import TeamRecords from '../components/Records';
 import useHttps from '../hooks/useHttp';
 import LoadingScreen from './Loading';
 
 export interface TeamPageProps {
     
 }
- 
+
 const TeamPage = (props:any):JSX.Element => {
+
     const [index, setIndex] = useState<number>(0);
     const {id} = props.match.params
     const {response, loading, error} = useHttps({
@@ -23,7 +25,6 @@ const TeamPage = (props:any):JSX.Element => {
         console.log(error)
         return (<></>)
     }
-    // console.log(response)
     return (
         <Flex style={{height:'90vh'}}>
             <Menu
@@ -45,6 +46,9 @@ const TeamPage = (props:any):JSX.Element => {
             />
             {
                 index === 0 && <CreateMeeting teamId={id} />   
+            }
+            {
+                 index === 1 && <TeamRecords meetings={response.meetings} />
             }
             {
                  index === 2 && <Members members={response.team.members} />

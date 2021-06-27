@@ -138,7 +138,7 @@ io.on('connection', socket => {
           socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
         }
       }catch(e){
-        console.error(e)
+        // console.error(e)
         socket.emit('meeting-not-found', 'Error: 404, Meeting not found')
       }
     })

@@ -15,8 +15,9 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         1. first check whether the meeting exists and is active.
         2. get All current users through socket
         3. Handle on close and refresh events.
+        4. If the person is the creator of meeting, give an option to end the meeting
     */
- 
+  
     const [peers, setPeers] = useState<Array<any>>([]);
     const [userLeft, setUserLeft] = useState(false)
     const [streamOptions, setStreamOptions] = useState({
@@ -145,7 +146,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                     const {signal, from} = payload
                     // check who sent the signal and accept it.(completes the handshake and establishes conn)
                     const item = peersRef.current.find(p => p.peerID === from.socketId);
-                    // if(item.peer.destroyed)
+                    // if(!item.peer.destroyed)
                         item.peer.signal(signal);
                 });
                 socketRef.current.on("leave-meeting" , (payload) => {
@@ -166,6 +167,13 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                         return p.info.socketId !== from
                     })
                     setPeers(newPeerArray)
+                })
+                socketRef.current.on('meeting-not-found', payload => {
+                    userStream.current && userStream.current.getTracks().forEach((track) => {
+                        console.log(track)
+                        track.stop()
+                    })
+                    history.push('/')
                 })
             })
             
