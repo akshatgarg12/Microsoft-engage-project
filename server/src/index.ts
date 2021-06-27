@@ -37,13 +37,13 @@ app.use(function (req, res, next) {
 app.use(
   cors({
     credentials: true,
-    origin: 'http://localhost:3000',
+    origin: true,
   })
 );
 app.set("trust proxy", 1);
+app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
-app.use(cookieParser());
 app.use('/api',API)
 app.get('/', isAuthenticated, (req:Request, res:Response) => {
   res.send("Hello World")
