@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useRef, useState, useEffect } from "react";
 import {Prompt, useHistory} from 'react-router-dom'
-import {Button, Flex} from '@fluentui/react-northstar'
+import {Button, Flex, Input} from '@fluentui/react-northstar'
 import socket from '../../config/socket'
 import Peer from "simple-peer";
 import classes from './style.module.css'
@@ -20,6 +20,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
   
     const [peers, setPeers] = useState<Array<any>>([]);
     const [userLeft, setUserLeft] = useState(false)
+    const [userToInvite, setUserToInvite] = useState<any>('')
     const [streamOptions, setStreamOptions] = useState({
         video : true,
         audio : false
@@ -63,6 +64,14 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
             console.log(track)
             track.stop()
         })
+    }
+    function SendInvite(){
+        // send some sort of link or btn to join
+        if(userToInvite){
+            const to = userToInvite
+            const info = 'Join the meeting : ' + meetingId
+            socketRef.current.emit('send-notification', {to, info})
+        }
     }
     useEffect(() => {
         try{
@@ -217,10 +226,17 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
     // console.log(peers)
     return (
         <>
-            <Flex hAlign = "end">
-                <Button content="leave" onClick={LeaveMeeting} />
-                <Button content={streamOptions.audio ? 'Audio Off' : 'Audio On'} onClick={() => setStreamOptions((prev) => ({...prev , audio:!streamOptions.audio}))}/>
-                <Button content={streamOptions.video ? 'Video Off' : 'Video On'} onClick={() => setStreamOptions((prev) => ({...prev , video:!streamOptions.video}))}/>
+            
+            <Flex space = "between" wrap>
+                <Flex hAlign="center">
+                    <Input placeholder="User Email..." value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')}/>
+                    <Button content="Invite" onClick={SendInvite} />
+                </Flex>
+                <Flex hAlign="center">
+                    <Button content="leave" onClick={LeaveMeeting} />
+                    <Button content={streamOptions.audio ? 'Audio Off' : 'Audio On'} onClick={() => setStreamOptions((prev) => ({...prev , audio:!streamOptions.audio}))}/>
+                    <Button content={streamOptions.video ? 'Video Off' : 'Video On'} onClick={() => setStreamOptions((prev) => ({...prev , video:!streamOptions.video}))}/>
+                </Flex>
             </Flex>
             <Flex hAlign="center">
                 <video className={classes.myVideo} autoPlay ref={userVideo} />
