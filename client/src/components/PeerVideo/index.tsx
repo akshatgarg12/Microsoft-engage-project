@@ -1,5 +1,6 @@
-import {useState, useRef, useReducer, useCallback, useEffect} from 'react'
-import {callAPI, CallAPIReducer} from '../../utils/http'
+import {useState, useRef, useEffect} from 'react'
+// import {useReducer, useCallback} from 'react' 
+// import {callAPI, CallAPIReducer} from '../../utils/http'
 import SimplePeer from 'simple-peer'
 import classes from './style.module.css'
 
@@ -10,29 +11,29 @@ interface PeerVideoProps{
 const PeerVideo = ({peer, info}:PeerVideoProps) => {
     const videoRef = useRef<HTMLVideoElement>(null)
     const [peerError,setPeerError] = useState(false)
-    const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
-        response : null,
-        loading : false,
-        error: null
-    })
-    const {response} = httpState
-    const getUserDetails = useCallback(async () => {
-        try{
-            httpDispatch({type : 'LOADING'})
-            const r = await callAPI({
-                path : '/user/' + info.userId,
-                method : 'GET',
-            })
-            console.log(r)
-            httpDispatch({type : 'RESPONSE', payload : r.user.name})    
-        }catch(e){
-            console.error(e)
-            httpDispatch({type : 'ERROR', payload : e.message})
-        }
-    }, [info])
+    // const [httpState, httpDispatch] = useReducer(CallAPIReducer, {
+    //     response : null,
+    //     loading : false,
+    //     error: null
+    // })
+    // const {response} = httpState
+    // const getUserDetails = useCallback(async () => {
+    //     try{
+    //         httpDispatch({type : 'LOADING'})
+    //         const r = await callAPI({
+    //             path : '/user/' + info.userId,
+    //             method : 'GET',
+    //         })
+    //         console.log(r)
+    //         httpDispatch({type : 'RESPONSE', payload : r.user.name})    
+    //     }catch(e){
+    //         console.error(e)
+    //         httpDispatch({type : 'ERROR', payload : e.message})
+    //     }
+    // }, [info])
 
     useEffect(()=>{
-        getUserDetails()
+        // getUserDetails()
         peer.on("stream", (stream:any) => {
             if(videoRef.current)
                 videoRef.current.srcObject = stream
@@ -45,14 +46,14 @@ const PeerVideo = ({peer, info}:PeerVideoProps) => {
             setPeerError(true)
         })
         if(peer.destroyed) setPeerError(true)
-    }, [peer, getUserDetails])
+    }, [peer])
 
     if(peerError) return null
 
     return (
         <div className={classes.peerVideoContainer}>
             <video className={classes.styledVideo} ref={videoRef} autoPlay />
-            <div>{response && response}</div>
+            <div>{info}</div>
         </div>
     )
 

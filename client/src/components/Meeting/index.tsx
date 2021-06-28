@@ -37,7 +37,8 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         const exit = confirm("Are you sure you want to reload?")
         if(exit){
             // leave meeting
-            history.push('/')
+            window.location.replace('/')
+
         }else{
             console.log('unload event unmount')
         }
@@ -56,7 +57,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
         }finally{
             setUserLeft(true)
             CloseMedia()
-            history.push('/')
+            window.location.replace('/')
         }
     }
     function CloseMedia(){
@@ -127,11 +128,10 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                     console.log(payload)
                     const peers:any = [];
                     members && members.forEach((to:any) => {
-                        const {socketId} = to;
                         // create peer of all members by sending signal 
                         const peer = sendOffer(to, from, userStream.current);
                         peersRef.current.push({
-                            peerID: socketId,
+                            info: to,
                             peer,
                         })
                         peers.push({peer, info : to});
@@ -144,7 +144,7 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                     const peer = sendAnswer(signal, from, to, userStream.current);
                     // remove the one with socketId which has been destroyed
                     peersRef.current.push({
-                        peerID: from.socketId,
+                        info: from,
                         peer,
                     })
                    
@@ -154,29 +154,30 @@ const Meeting = ({meetingId}:MeetingProps): JSX.Element => {
                 socketRef.current.on("receive-answer", payload => {
                     const {signal, from} = payload
                     // check who sent the signal and accept it.(completes the handshake and establishes conn)
-                    const item = peersRef.current.find(p => p.peerID === from.socketId);
+                    const item = peersRef.current.find(p => p.info === from);
                     // if(!item.peer.destroyed)
                         item.peer.signal(signal);
                 });
-                socketRef.current.on("leave-meeting" , (payload) => {
-                    const socketId = socketRef.current.id
-                    peersRef.current.forEach((peer) => {
-                        socketRef.current.emit("leaving", {from:socketId,to:peer.peerID})
-                    })
-                })
-                socketRef.current.on("leaving" , payload => {
-                    const {from} = payload
-                    peersRef.current = peersRef.current.filter((p) => {
-                        if(p.peerID === from) p.peer.destroy()
-                        return p.peerID !== from
-                    })
-                    // remove from peer array aswell
-                    const newPeerArray = [...peers].filter((p) => {
-                        if(p.info.socketId === from) p.peer.destroy()
-                        return p.info.socketId !== from
-                    })
-                    setPeers(newPeerArray)
-                })
+
+                // socketRef.current.on("leave-meeting" , (payload) => {
+                //     peersRef.current.forEach(({info}) => {
+                //         socketRef.current.emit("leaving", {to:info, from:socketRef.current.id})
+                //     })
+                // })
+                // socketRef.current.on("leaving" , payload => {
+                //     const {from} = payload
+                //     peersRef.current = peersRef.current.filter((p) => {
+                //         if(p.peerID === from) p.peer.destroy()
+                //         return p.peerID !== from
+                //     })
+                //     // remove from peer array aswell
+                //     const newPeerArray = [...peers].filter((p) => {
+                //         if(p.info.socketId === from) p.peer.destroy()
+                //         return p.info.socketId !== from
+                //     })
+                //     setPeers(newPeerArray)
+                // })
+
                 socketRef.current.on('meeting-not-found', payload => {
                     userStream.current && userStream.current.getTracks().forEach((track) => {
                         console.log(track)
