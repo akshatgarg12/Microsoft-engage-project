@@ -77,25 +77,26 @@ io.use(async (socket, next) => {
   next()
 })
 
-const SOCKET_MAP:any = {}
+const SOCKET_MAP = new Map()
 
 io.on('connection', socket => {
     // store userId and socketId in a map to send notifications
     // @ts-ignore
     const user = socket.user
     if(user){
-      SOCKET_MAP[user.email] = socket.id
+      SOCKET_MAP.set(user.email, socket.id)
     }
-    const socketId = socket.id
     
     socket.on('send-notification', (payload) => {
       const {to, info} = payload
-      if(SOCKET_MAP[to]){
-        const socketIdToNotify = SOCKET_MAP[to]
+      if(SOCKET_MAP.has(to)){
+        const socketIdToNotify = SOCKET_MAP.get(to)
         io.to(socketIdToNotify).emit('notification', info)
       }
     })
-
+    socket.on('disconnect' , () => {
+      SOCKET_MAP.delete(user.email)
+    })
     socket.on('join-meeting', async (meetingId) => {
       // find if meeting exists and is active
       try{
@@ -107,44 +108,48 @@ io.on('connection', socket => {
         if(meeting){
           if(meeting.active){
             // find the users in the meeting
+            let roomMembers = await io.in(meetingId).allSockets()
+            const members = []
+            for (const [key, value] of SOCKET_MAP.entries()) {
+              if(roomMembers.has(value)){
+                  members.push(key)
+              }
+            }
+            // get user in the room
+            socket.join(meetingId)
             // send the meeting members to the new user who joined
-            const from = {
-              socketId,
-              userId : user._id
-            }
-            const n = meeting.inMeeting.length
-            let userAlreadyInMeet = false
-            for(let i = 0; i < n; i++){
-              const member = meeting.inMeeting[i]
-              if(String(member.userId) === String(user._id)){
-                  // destroy this socketId and its peer conn
-                  io.to(meeting.inMeeting[i].socketId).emit("leave-meeting");
-                  meeting.inMeeting[i].socketId = socketId
-                  userAlreadyInMeet = true
-                  break
-                }
-            }
-            if(!userAlreadyInMeet)
-              meeting.inMeeting = [...meeting.inMeeting, from]
-            const members = meeting.inMeeting.filter((mem:any) => String(mem.userId) !== String(user._id))
-            socket.emit('meeting-members',{ members, from})
+            socket.emit('meeting-members',{ members, from:user.email})
+
             socket.on('sending-signal', payload => {
               const {to, from, signal} = payload
-              io.to(to.socketId).emit('user-offer', {signal, from, to})
+              if(SOCKET_MAP.has(to)){
+                io.to(SOCKET_MAP.get(to)).emit('user-offer', {signal, from, to})
+              }
             })
+
             socket.on('user-answer', payload => {
               const {signal, to, from} = payload
-              io.to(to.socketId).emit('receive-answer', {signal, from})
+              if(SOCKET_MAP.has(to)){
+                io.to(SOCKET_MAP.get(to)).emit('receive-answer', {signal, from})
+              }
             })
-            socket.on("leaving", async (payload) => {
-              const {from, to} = payload
-              meeting.inMeeting = meeting.inMeeting.filter((mem:any) => mem.socketId !== from)
-              io.to(to).emit("leaving", {from})
-            })
-            socket.on("leaving-meeting", () => {
-              socket.emit('leave-meeting')
-            })
-            await meeting.save()
+
+            // socket.on("leaving", async (payload) => {
+            //   const {to, from} = payload
+            //   let fromVal = ''
+            //   for (const [key, value] of SOCKET_MAP.entries()) {
+            //     if(value === from){
+            //         members.push(key)
+            //     }
+            //   }
+            //   if(SOCKET_MAP.has(to))
+            //     io.to(SOCKET_MAP.get(to)).emit("leaving", {from})
+            // })
+            // socket.on("leaving-meeting", () => {
+            //   socket.leave(meetingId)
+            //   socket.emit('leave-meeting')
+            // })
+
           }else{
             socket.emit('meeting-ended', 'Error: 400, Meeting has already ended')
           }
@@ -165,6 +170,7 @@ io.on('connection', socket => {
        5. End the meeting event , set the active to false and remove all users
       */
 });
+
 
 
 const serverStart = async () => {
