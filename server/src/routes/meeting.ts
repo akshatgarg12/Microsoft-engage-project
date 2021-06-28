@@ -1,6 +1,6 @@
-import {Router} from 'express'
+import { Router } from 'express'
 import isAuthenticated from '../middleware/auth'
-import { createMeeting, getMeetings} from '../controllers/meeting'
+import { createMeeting, getMeetings } from '../controllers/meeting'
 const router = Router()
 
 router.use(isAuthenticated)

@@ -1,6 +1,6 @@
-import {Router} from 'express'
+import { Router } from 'express'
 import isAuthenticated from '../middleware/auth'
-import {currentUser, login, logout, register, getUser} from '../controllers/auth'
+import { currentUser, login, logout, register, getUser } from '../controllers/auth'
 const router = Router()
 
 router.post('/login', login)

@@ -1,4 +1,4 @@
-import {Router} from 'express'
+import { Router } from 'express'
 import isAuthenticated from '../middleware/auth'
 import { createTeam, getTeam, getTeams } from '../controllers/team'
 const router = Router()
