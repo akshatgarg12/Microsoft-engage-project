@@ -13,7 +13,6 @@ export const getUserFromCookie = async (user: string) => {
     const userData = await User.findOne({ _id })
     if (userData) {
       userData.password = undefined
-      // @ts-expect-error
       return userData
     } else {
       return null
