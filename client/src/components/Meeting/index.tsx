@@ -20,9 +20,9 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const [peers, setPeers] = useState<any[]>([])
   const [userLeft, setUserLeft] = useState(false)
   const [userToInvite, setUserToInvite] = useState<any>('')
-  const [streamOptions, setStreamOptions] = useState({
+  const [streamOptions, ] = useState({
     video: true,
-    audio: false
+    audio: true
   })
   const userStream = useRef<MediaStream | null>(null)
   const socketRef = useRef(socket)
@@ -219,6 +219,23 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     return peer
   }
   // console.log(peers)
+  const stopAudio = () => {
+    userStream.current?.getAudioTracks().forEach((track) => track.enabled = false)
+  }
+  const stopVideo = () => {
+    userStream.current?.getVideoTracks().forEach((track) => track.enabled = false)
+  }
+  const startVideo = async () => {
+    userStream.current?.getVideoTracks().forEach((track) => track.enabled = true)
+  }
+  const startAudio = async () => {
+     userStream.current?.getAudioTracks().forEach((track) => track.enabled = false)
+  }
+  const sendStreamOptions = () => {
+    peers.forEach(({peer}) => {
+      peer.send(JSON.stringify(streamOptions))
+    })
+  }
   return (
     <>
       <Flex space='between' wrap>
@@ -228,8 +245,11 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         </Flex>
         <Flex hAlign='center'>
           <Button content='leave' onClick={LeaveMeeting} />
-          <Button content={streamOptions.audio ? 'Audio Off' : 'Audio On'} onClick={() => setStreamOptions((prev) => ({ ...prev, audio: !streamOptions.audio }))} />
-          <Button content={streamOptions.video ? 'Video Off' : 'Video On'} onClick={() => setStreamOptions((prev) => ({ ...prev, video: !streamOptions.video }))} />
+          <Button content='Audio Off' onClick={stopAudio} />
+          <Button content='Audio ON' onClick={startAudio} />
+          <Button content='Video Off' onClick={stopVideo} />
+          <Button content='Video ON' onClick={startVideo} />
+          <Button content='SEND' onClick={sendStreamOptions} />
         </Flex>
       </Flex>
       <Flex hAlign='center'>

@@ -9,14 +9,12 @@ interface PeerVideoProps{
 const PeerVideo = ({ peer, info}: PeerVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [peerError, setPeerError] = useState(false)
-
-  // useEffect(()=>{
-  //     myStream?.getTracks().forEach((track) => peer.addTrack(track, myStream))
-  // },[peer, myStream])
-
+  const streamRef = useRef<MediaStream | null>(null)
+  
   useEffect(() => {
     peer.on('stream', (stream: any) => {
-      if (videoRef.current != null) { videoRef.current.srcObject = stream }
+      streamRef.current = stream
+      if (videoRef.current != null) { videoRef.current.srcObject = streamRef.current }
     })
     peer.on('error', (e: any) => {
       console.log(e)
@@ -25,9 +23,13 @@ const PeerVideo = ({ peer, info}: PeerVideoProps) => {
     peer.on('close', () => {
       setPeerError(true)
     })
+    peer.on('data', (payload) => {
+      console.log(JSON.parse(payload))
+    })
     if (peer.destroyed) setPeerError(true)
   }, [peer])
 
+ 
   if (peerError) return null
 
   return (
