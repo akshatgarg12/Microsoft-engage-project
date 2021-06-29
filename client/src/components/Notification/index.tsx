@@ -1,27 +1,26 @@
-import { useEffect } from "react";
+import { useEffect } from 'react'
 import socket from '../../config/socket'
 import { useToasts } from 'react-toast-notifications'
 
 export interface NotificationListenerProps {
-    
+
 }
- 
 
-const NotificationListener = ({children}:any):JSX.Element => {
-    const {addToast} = useToasts()
+const NotificationListener = ({ children }: any): JSX.Element => {
+  const { addToast } = useToasts()
 
-    useEffect(()=>{
-        socket.on('notification', (info) => {
-            addToast(info,{apperance : 'success'})
-            console.log('Notification : ', info)
-        })
-    }, [addToast])
+  useEffect(() => {
+    socket.on('notification', (info) => {
+      addToast(info, { apperance: 'success' })
+      console.log('Notification : ', info)
+    })
+  }, [addToast])
 
-    return (
-        <>
-            {children}
-        </>
-    );
+  return (
+    <>
+      {children}
+    </>
+  )
 }
- 
-export default NotificationListener;
+
+export default NotificationListener

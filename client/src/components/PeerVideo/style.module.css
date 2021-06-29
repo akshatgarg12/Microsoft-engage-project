@@ -5,8 +5,10 @@
 }
 .peerVideoContainer{
     height:40%;
-    max-height: 300px;
     width:50%;
-    /* background: red; */
+    max-height: 300px;
+    max-width: 400px;
+    margin:auto;
     text-align: center;
+    object-fit: contain;
 }

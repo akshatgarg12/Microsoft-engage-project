@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@types/react-router-dom": "^5.1.7",
-    "@types/simple-peer": "^9.11.0"
+    "@types/simple-peer": "^9.11.0",
+    "ts-standard": "^10.0.0"
   }
 }
