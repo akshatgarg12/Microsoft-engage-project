@@ -8,6 +8,7 @@
     width:50%;
     max-height: 300px;
     max-width: 400px;
+    min-width: 300px;
     margin:auto;
     text-align: center;
     object-fit: contain;
