@@ -219,11 +219,11 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
 
       <Flex hAlign='center' vAlign="end" gap="gap.medium" className={classes.control}>
           {
-            streamOptions.video ? <CallVideoOffIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoIcon onClick={startVideo} size="larger"  circular />
+            streamOptions.video ? <CallVideoIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon onClick={startVideo} size="larger"  circular />
           }
             <CallEndIcon onClick={LeaveMeeting} size="larger" circular />
           {
-            streamOptions.audio ? <MicOffIcon onClick={stopAudio} size="larger"  circular /> : <MicIcon onClick={startAudio} size="larger"  circular />
+            streamOptions.audio ? <MicIcon onClick={stopAudio} size="larger"  circular /> : <MicOffIcon onClick={startAudio} size="larger"  circular />
           }
       </Flex>
       <Prompt
