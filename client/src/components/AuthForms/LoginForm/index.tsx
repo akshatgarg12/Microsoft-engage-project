@@ -1,6 +1,5 @@
 import { Form, FormInput, FormCheckbox, FormButton, Text } from '@fluentui/react-northstar'
 import { useReducer, useState } from 'react'
-import { useHistory } from 'react-router-dom'
 import { AuthReducerActionType } from '../../../context/Auth'
 import useAuth from '../../../hooks/useAuth'
 import { callAPI, CallAPIReducer } from '../../../utils/http'
@@ -22,7 +21,6 @@ const LoginForm = (): JSX.Element | null => {
   })
   const { error, response, loading } = httpState
   const { dispatch } = useAuth()
-  const history = useHistory()
   const onChangeHandler = (e: any, data: any) => {
     const { name, value } = data
     setFormData((prev: LoginFormData) => ({ ...prev, [name]: value }))
@@ -38,7 +36,7 @@ const LoginForm = (): JSX.Element | null => {
       })
       httpDispatch({ type: 'RESPONSE', payload: r })
       dispatch({ type: AuthReducerActionType.LOGIN, payload: r.user })
-      history.push('/')
+      window.location.replace('/')
       return null
     } catch (e) {
       httpDispatch({ type: 'ERROR', payload: e.message })

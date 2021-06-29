@@ -2,6 +2,8 @@
 import { useRef, useState, useEffect } from 'react'
 import { Prompt, useHistory } from 'react-router-dom'
 import { Button, Flex, Input } from '@fluentui/react-northstar'
+import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon } from '@fluentui/react-icons-northstar'
+import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
 import classes from './style.module.css'
@@ -20,7 +22,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const [peers, setPeers] = useState<any[]>([])
   const [userLeft, setUserLeft] = useState(false)
   const [userToInvite, setUserToInvite] = useState<any>('')
-  const [streamOptions, ] = useState({
+  const [streamOptions, setStreamOptions ] = useState({
     video: true,
     audio: true
   })
@@ -29,7 +31,18 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const userVideo = useRef<HTMLVideoElement>(null)
   const peersRef = useRef<any[]>([])
   const history = useHistory()
-
+  const streamConstraints:MediaStreamConstraints = {
+    audio : {
+        sampleSize: 8,
+        echoCancellation : true,
+        noiseSuppression : true
+    },
+    video : {
+      frameRate: 30,
+      width: 700,
+      height: 900,
+    }
+  }
   // stops to reload if done by mistake
   function confirmExit () {
     // eslint-disable-next-line no-restricted-globals
@@ -60,7 +73,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   }
   function CloseMedia () {
     (userStream.current != null) && userStream.current.getTracks().forEach((track) => {
-      console.log(track)
       track.stop()
     })
   }
@@ -84,28 +96,13 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     }
   }, [userStream.current])
 
-  useEffect(() => {
-    CloseMedia()
-    const { audio, video } = streamOptions
-    if (!audio && !video) {
-      if (userVideo.current != null) {
-        userVideo.current.srcObject = null
-      }
-    } else {
-      navigator.mediaDevices.getUserMedia(streamOptions).then((stream) => {
-        // get this new stream and customise the stream to all peers
-        userStream.current = stream
-        if (userVideo.current != null) { userVideo.current.srcObject = userStream.current }
-      })
-    }
-  }, [streamOptions])
 
   useEffect(() => {
     try {
       // connect socket
       socketRef.current.connect()
       // get user media
-      navigator.mediaDevices.getUserMedia(streamOptions).then(stream => {
+      navigator.mediaDevices.getUserMedia(streamConstraints).then(stream => {
         userStream.current = stream
         if (userVideo.current != null) { userVideo.current.srcObject = stream }
         // emit signal to join room
@@ -167,7 +164,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       window.onclose = DestroyConnections
       console.log(peers)
     } catch (e) {
-      // console.log(e)
       history.push('/')
     }
   }, [])
@@ -199,56 +195,51 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     })
     return peer
   }
-  // console.log(peers)
+  
   const stopAudio = () => {
     userStream.current?.getAudioTracks().forEach((track) => track.enabled = false)
+    setStreamOptions((prev) => ({...prev, audio:false}))
   }
   const stopVideo = () => {
     userStream.current?.getVideoTracks().forEach((track) => track.enabled = false)
+    setStreamOptions((prev) => ({...prev, video:false}))
   }
   const startVideo = async () => {
     userStream.current?.getVideoTracks().forEach((track) => track.enabled = true)
+    setStreamOptions((prev) => ({...prev, video:true}))
   }
   const startAudio = async () => {
-     userStream.current?.getAudioTracks().forEach((track) => track.enabled = true)
+    userStream.current?.getAudioTracks().forEach((track) => track.enabled = true)
+    setStreamOptions((prev) => ({...prev, audio:true}))
   }
-  const sendStreamOptions = () => {
-    peers.forEach(({peer}) => {
-      peer.send(JSON.stringify(streamOptions))
-    })
-  }
+  const height = peers.length <= 2 ? '95%' : '70%'
   return (
-    <>
-      <Flex space='between' wrap>
-        <Flex hAlign='center'>
-          <Input placeholder='User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
-          <Button content='Invite' onClick={SendInvite} />
-        </Flex>
-        <Flex hAlign='center'>
-          <Button content='leave' onClick={LeaveMeeting} />
-          <Button content='Audio Off' onClick={stopAudio} />
-          <Button content='Audio ON' onClick={startAudio} />
-          <Button content='Video Off' onClick={stopVideo} />
-          <Button content='Video ON' onClick={startVideo} />
-          <Button content='SEND' onClick={sendStreamOptions} />
-        </Flex>
-      </Flex>
+    <Flex column={true} className={classes.meeting} gap="gap.smaller">
       <Flex hAlign='center'>
-        <video className={classes.myVideo} autoPlay ref={userVideo} />
+        <Input placeholder='User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
+        <Button content='Invite' onClick={SendInvite} />
       </Flex>
-      {/* change container style based on the number of peers */}
-      {/* if less than =  2 : side by side */}
-      {/* else one big and others in small box, onClick to make it big. */}
       <Flex wrap className={classes.container}>
+        <Video videoRef={userVideo} info={'Myself'} height={height} />
         {
-          peers.map((value: any, index: any) => <PeerVideo key={value.info}  peer={value.peer} info={value.info} />)
+          peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
         }
+      </Flex>
+
+      <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
+          {
+            streamOptions.video ? <CallVideoIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon onClick={startVideo} size="larger"  circular />
+          }
+            <CallEndIcon onClick={LeaveMeeting} size="larger" circular />
+          {
+            streamOptions.audio ? <MicIcon onClick={stopAudio} size="larger"  circular /> : <MicOffIcon onClick={startAudio} size="larger"  circular />
+          }
       </Flex>
       <Prompt
         when={!userLeft}
         message='Are you sure you want to leave?'
       />
-    </>
+    </Flex>
 
   )
 }
