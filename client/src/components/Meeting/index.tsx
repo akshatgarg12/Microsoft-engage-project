@@ -153,25 +153,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
           item.peer.signal(signal)
         })
 
-        // socketRef.current.on("leave-meeting" , (payload) => {
-        //     peersRef.current.forEach(({info}) => {
-        //         socketRef.current.emit("leaving", {to:info, from:socketRef.current.id})
-        //     })
-        // })
-        // socketRef.current.on("leaving" , payload => {
-        //     const {from} = payload
-        //     peersRef.current = peersRef.current.filter((p) => {
-        //         if(p.peerID === from) p.peer.destroy()
-        //         return p.peerID !== from
-        //     })
-        //     // remove from peer array aswell
-        //     const newPeerArray = [...peers].filter((p) => {
-        //         if(p.info.socketId === from) p.peer.destroy()
-        //         return p.info.socketId !== from
-        //     })
-        //     setPeers(newPeerArray)
-        // })
-
         socketRef.current.on('meeting-not-found', payload => {
           (userStream.current != null) && userStream.current.getTracks().forEach((track) => {
             console.log(track)
@@ -229,7 +210,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     userStream.current?.getVideoTracks().forEach((track) => track.enabled = true)
   }
   const startAudio = async () => {
-     userStream.current?.getAudioTracks().forEach((track) => track.enabled = false)
+     userStream.current?.getAudioTracks().forEach((track) => track.enabled = true)
   }
   const sendStreamOptions = () => {
     peers.forEach(({peer}) => {

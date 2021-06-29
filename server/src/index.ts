@@ -131,22 +131,6 @@ io.on('connection', socket => {
               io.to(SOCKET_MAP.get(to)).emit('receive-answer', { signal, from })
             }
           })
-
-          // socket.on("leaving", async (payload) => {
-          //   const {to, from} = payload
-          //   let fromVal = ''
-          //   for (const [key, value] of SOCKET_MAP.entries()) {
-          //     if(value === from){
-          //         members.push(key)
-          //     }
-          //   }
-          //   if(SOCKET_MAP.has(to))
-          //     io.to(SOCKET_MAP.get(to)).emit("leaving", {from})
-          // })
-          // socket.on("leaving-meeting", () => {
-          //   socket.leave(meetingId)
-          //   socket.emit('leave-meeting')
-          // })
         } else {
           socket.emit('meeting-ended', 'Error: 400, Meeting has already ended')
         }
