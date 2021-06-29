@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react'
 import { Prompt, useHistory } from 'react-router-dom'
 import { Button, Flex, Input } from '@fluentui/react-northstar'
 import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon } from '@fluentui/react-icons-northstar'
+import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
 import classes from './style.module.css'
@@ -30,7 +31,18 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const userVideo = useRef<HTMLVideoElement>(null)
   const peersRef = useRef<any[]>([])
   const history = useHistory()
-
+  const streamConstraints:MediaStreamConstraints = {
+    audio : {
+        sampleSize: 8,
+        echoCancellation : true,
+        noiseSuppression : true
+    },
+    video : {
+      frameRate: 30,
+      width: 700,
+      height: 900,
+    }
+  }
   // stops to reload if done by mistake
   function confirmExit () {
     // eslint-disable-next-line no-restricted-globals
@@ -90,7 +102,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       // connect socket
       socketRef.current.connect()
       // get user media
-      navigator.mediaDevices.getUserMedia(streamOptions).then(stream => {
+      navigator.mediaDevices.getUserMedia(streamConstraints).then(stream => {
         userStream.current = stream
         if (userVideo.current != null) { userVideo.current.srcObject = stream }
         // emit signal to join room
@@ -200,24 +212,21 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     userStream.current?.getAudioTracks().forEach((track) => track.enabled = true)
     setStreamOptions((prev) => ({...prev, audio:true}))
   }
-  
+  const height = peers.length <= 2 ? '95%' : '70%'
   return (
     <Flex column={true} className={classes.meeting} gap="gap.smaller">
       <Flex hAlign='center'>
         <Input placeholder='User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
         <Button content='Invite' onClick={SendInvite} />
       </Flex>
-    
       <Flex wrap className={classes.container}>
-        <Flex className={classes.myVideoContainer}>
-          <video className={classes.myVideo} autoPlay ref={userVideo} />
-        </Flex>
+        <Video videoRef={userVideo} info={'Myself'} height={height} />
         {
-          peers.map((value: any, index: any) => <PeerVideo key={value.info}  peer={value.peer} info={value.info} />)
+          peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
         }
       </Flex>
 
-      <Flex hAlign='center' vAlign="end" gap="gap.medium" className={classes.control}>
+      <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
           {
             streamOptions.video ? <CallVideoIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon onClick={startVideo} size="larger"  circular />
           }

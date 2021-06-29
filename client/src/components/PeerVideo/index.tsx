@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import SimplePeer from 'simple-peer'
-import classes from './style.module.css'
-
+import Video from '../Video'
 interface PeerVideoProps{
   peer: SimplePeer.Instance
   info: any
+  height : string
 }
-const PeerVideo = ({ peer, info}: PeerVideoProps) => {
+const PeerVideo = ({ peer, info, height}: PeerVideoProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [peerError, setPeerError] = useState(false)
   const streamRef = useRef<MediaStream | null>(null)
@@ -33,10 +33,7 @@ const PeerVideo = ({ peer, info}: PeerVideoProps) => {
   if (peerError) return null
 
   return (
-    <div className={classes.peerVideoContainer}>
-      <video className={classes.styledVideo} ref={videoRef} autoPlay />
-      <div>{info}</div>
-    </div>
+    <Video videoRef={videoRef} info={info} height={height} />
   )
 }
 

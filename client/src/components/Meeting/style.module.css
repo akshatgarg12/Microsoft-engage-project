@@ -1,28 +1,19 @@
 .meeting{
     height:90vh;
 }
-.myVideo{
-    height:100%;
-    width: 100%;
-    margin:auto;
-}
-.myVideoContainer{
-    height:40%;
-    width:50%;
-    max-height: 300px;
-    max-width: 400px;
-    min-width: 300px;
-    margin:auto;
-    text-align: center;
-    object-fit: contain;
-}
 .container{
     padding: 20px;
-    height: 80vh;
+    height: 90vh;
     overflow-y: scroll;
     width: 100%;
     margin: 0 auto;
+    scrollbar-width: thin;
 }
-.controls{
+.control{
     z-index: 10;
+    margin-bottom: 0;
+    background:#293241;
+    padding:10px;
+    padding-bottom: 20px;
+    color:#edf6f9;
 }
