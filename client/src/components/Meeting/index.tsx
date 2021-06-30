@@ -2,13 +2,14 @@
 import { useRef, useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Flex, Input } from '@fluentui/react-northstar'
-import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon,CloseIcon, BellIcon,SendIcon} from '@fluentui/react-icons-northstar'
+import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon} from '@fluentui/react-icons-northstar'
 import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
 import classes from './style.module.css'
 import PeerVideo from '../PeerVideo'
 import useAuth from '../../hooks/useAuth'
+import MeetingChatBox from '../MeetingChatBox'
 export interface MeetingProps {
   meetingId: string
 }
@@ -265,15 +266,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         </Flex>
       </Flex>
      {
-       showChat && <Flex column={true} className={classes.chatbox}>
-              <CloseIcon onClick={toggleChatBox} />
-              {
-                chats.map(({from, message}) => {
-                  return <div>{from} : {message}</div>
-                })
-              }
-              <SendIcon onClick={() => sendChat('Hello')} />
-        </Flex>
+       showChat && <MeetingChatBox toggleChatBox = {toggleChatBox} chats = {chats} sendChat = {sendChat} />
       }
     </div>
 

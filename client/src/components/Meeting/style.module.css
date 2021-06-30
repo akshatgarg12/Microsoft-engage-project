@@ -21,13 +21,3 @@
     padding-bottom: 20px;
     color:#edf6f9;
 }
-.chatbox{
-    width:30%;
-    min-width: 300px;
-    position:absolute;
-    z-index: 100;
-    background: red;
-    right:0;
-    top:0;
-    height:90vh;
-}

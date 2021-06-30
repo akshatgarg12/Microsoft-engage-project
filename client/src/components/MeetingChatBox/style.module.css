@@ -1,0 +1,38 @@
+.chatbox{
+    width:30%;
+    min-width: 300px;
+    position:absolute;
+    z-index: 100;
+    background: #fff;
+    right:0;
+    top:0;
+    height:90vh;
+    box-shadow: 0 4px 4px 6px rgba(0,0,0,0.2);
+}
+.topSection{
+    padding:10px;
+    border-bottom: 1px solid purple;
+}
+.middleSection{
+    padding:10px;
+    height:100vh;
+    overflow-y: scroll !important;
+}
+.bottomSection{
+    padding:10px;
+}
+.bottomSection input{
+    font-size:1.25rem;
+}
+.chat{
+    padding:5px;
+    width: 100%;
+    margin: 2px auto;
+}
+.sentBy{
+    font-style: italic;
+    font-size: 1.25rem;
+}
+.message{
+    font-size: 1.40rem;
+}
