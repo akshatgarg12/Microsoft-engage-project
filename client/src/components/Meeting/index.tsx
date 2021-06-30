@@ -220,7 +220,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         <Button content='Invite' onClick={SendInvite} />
       </Flex>
       <Flex wrap className={classes.container}>
-        <Video videoRef={userVideo} info={'Myself'} height={height} />
+        <Video videoRef={userVideo} info={'Myself'} height={height} muted={true} />
         {
           peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
         }

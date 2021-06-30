@@ -33,7 +33,7 @@ const PeerVideo = ({ peer, info, height}: PeerVideoProps) => {
   if (peerError) return null
 
   return (
-    <Video videoRef={videoRef} info={info} height={height} />
+    <Video videoRef={videoRef} info={info} height={height} muted={false} />
   )
 }
 
