@@ -1,7 +1,11 @@
+.container{
+    position:relative;
+    overflow-x: hidden;
+}
 .meeting{
     height:90vh;
 }
-.container{
+.videoContainer{
     padding: 20px;
     height: 90vh;
     overflow-y: scroll;
@@ -16,4 +20,14 @@
     padding:10px;
     padding-bottom: 20px;
     color:#edf6f9;
+}
+.chatbox{
+    width:30%;
+    min-width: 300px;
+    position:absolute;
+    z-index: 100;
+    background: red;
+    right:0;
+    top:0;
+    height:90vh;
 }

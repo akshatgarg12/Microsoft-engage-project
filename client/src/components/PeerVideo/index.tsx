@@ -24,7 +24,7 @@ const PeerVideo = ({ peer, info, height}: PeerVideoProps) => {
       setPeerError(true)
     })
     peer.on('data', (payload) => {
-      console.log(JSON.parse(payload))
+      console.log(payload)
     })
     if (peer.destroyed) setPeerError(true)
   }, [peer])
