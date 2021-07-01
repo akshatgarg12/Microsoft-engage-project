@@ -3,6 +3,7 @@ import { useState } from 'react'
 import CreateMeeting from '../components/CreateMeeting'
 import Members from '../components/Members'
 import TeamRecords from '../components/Records'
+import TeamChat from '../components/TeamChat'
 import useHttps from '../hooks/useHttp'
 import LoadingScreen from './Loading'
 
@@ -51,6 +52,9 @@ const TeamPage = (props: any): JSX.Element => {
       }
       {
         index === 2 && <Members members={response.team.members} />
+      }
+      {
+        index === 3 && <TeamChat />
       }
     </Flex>
   )
