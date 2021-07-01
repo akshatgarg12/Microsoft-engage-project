@@ -156,11 +156,24 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     }
   }, [])
 
+  useEffect(() => {
+    const payload = {
+      type : 'streamState',
+      ...streamOptions
+    }
+    peers.forEach(({peer}) => { 
+      if(!peer.destroyed)
+        peer.send(JSON.stringify(payload))
+    })
+  }, [streamOptions])
+
   useEffect(()=> {
     peers.forEach(({peer}) => {
       peer.on('data', (data:any) => {
         // recived a chat. add it to the chat box
-        receiveChat(JSON.parse(data))
+        const payload = JSON.parse(data)
+        if(payload.type === 'chat')
+          receiveChat(payload)
       })
     })
   }, [peers])
@@ -207,6 +220,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   // Functions to handle Chat 
   const sendChat = (message:string) => {
     const payload = {
+      type : 'chat',
       from : user.name,
       message 
     }
@@ -217,7 +231,8 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     setChats((prev) => ([...prev, {from : 'me', message}]))
   }
   const receiveChat = (payload:any) => {
-    setChats((prev) => ([...prev, payload]))
+    const {from, message} = payload
+    setChats((prev) => ([...prev, {from, message}]))
   }
   const toggleChatBox = () => setShowChat((prev) => !prev)
 
@@ -242,14 +257,15 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const height = peers.length <= 2 ? '95%' : '70%'
   return (
     <div className={classes.container}>
+
       <Flex column={true} className={classes.meeting} gap="gap.smaller">
-        <Flex hAlign='center' vAlign='center' gap="gap.small">
+        <Flex hAlign='center' vAlign='center' gap="gap.small" className = {classes.topSection}>
           <Input placeholder='Invite User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
           <BellIcon onClick={SendInvite} />
           <ChatIcon onClick={toggleChatBox} />
         </Flex>
         <Flex wrap className={classes.videoContainer}>
-          <Video videoRef={userVideo} info={'Myself'} height={height} muted={true} />
+          <Video streamState={streamOptions} videoRef={userVideo} info={'Myself'} height={height} muted={true} />
           {
             peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
           }
@@ -257,15 +273,16 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
 
         <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
             {
-              streamOptions.video ? <CallVideoIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon onClick={startVideo} size="larger"  circular />
+              streamOptions.video ? <CallVideoIcon className={classes.whiteIcon} onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon className={classes.redIcon} onClick={startVideo} size="larger"  circular />
             }
-              <CallEndIcon onClick={() => LeaveMeeting()} size="larger" circular />
+              <CallEndIcon className={classes.redIcon} onClick={() => LeaveMeeting()} size="larger" circular />
             {
-              streamOptions.audio ? <MicIcon onClick={stopAudio} size="larger"  circular /> : <MicOffIcon onClick={startAudio} size="larger"  circular />
+              streamOptions.audio ? <MicIcon className={classes.whiteIcon} onClick={stopAudio} size="larger"  circular /> : <MicOffIcon className={classes.redIcon} onClick={startAudio} size="larger"  circular />
             }
         </Flex>
       </Flex>
-     {
+
+      {
        showChat && <MeetingChatBox toggleChatBox = {toggleChatBox} chats = {chats} sendChat = {sendChat} />
       }
     </div>
