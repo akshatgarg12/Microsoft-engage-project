@@ -75,7 +75,7 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
                     chats.map((chat) => {
                         const {_id, from, message} = chat
                         return (
-                            <Chat key={_id} _id = {_id} from={from === user.email ? 'me' : user.email} message={message} />
+                            <Chat key={_id} _id = {_id} from={from === user.email ? 'me' : from} message={message} />
                         )
                     })
                 }

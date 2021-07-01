@@ -11,8 +11,10 @@
     max-width: 75%;
     padding:10px;
     border-radius: 10px;
+    word-wrap: break-word;
 }
 .fromchat{
     font-weight: 600;
+    width: 100%;
     color: black;
 }
