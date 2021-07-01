@@ -1,27 +1,25 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useRef, useState, useEffect } from 'react'
-import { Prompt, useHistory } from 'react-router-dom'
-import { Button, Flex, Input } from '@fluentui/react-northstar'
-import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon } from '@fluentui/react-icons-northstar'
+import { useHistory } from 'react-router-dom'
+import { Flex, Input } from '@fluentui/react-northstar'
+import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon} from '@fluentui/react-icons-northstar'
 import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
 import classes from './style.module.css'
 import PeerVideo from '../PeerVideo'
+import useAuth from '../../hooks/useAuth'
+import MeetingChatBox from '../MeetingChatBox'
 export interface MeetingProps {
   meetingId: string
 }
 
 const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
-  /*
-        1. first check whether the meeting exists and is active.
-        2. get All current users through socket
-        3. Handle on close and refresh events.
-        4. If the person is the creator of meeting, give an option to end the meeting
-    */
   const [peers, setPeers] = useState<any[]>([])
-  const [userLeft, setUserLeft] = useState(false)
+  const {user} = useAuth()
   const [userToInvite, setUserToInvite] = useState<any>('')
+  const [chats, setChats] = useState<Array<any>>([])
+  const [showChat, setShowChat] = useState(false)
   const [streamOptions, setStreamOptions ] = useState({
     video: true,
     audio: true
@@ -43,22 +41,21 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       height: 900,
     }
   }
-  // stops to reload if done by mistake
+  // Utility Functions
   function confirmExit () {
-    // eslint-disable-next-line no-restricted-globals
-    const exit = confirm('Are you sure you want to reload?')
+    const exit = window.confirm('Are you sure you want to reload?')
     if (exit) {
-      // leave meeting
       window.location.replace('/')
     } else {
       console.log('unload event unmount')
     }
     return ''
   }
-  function DestroyConnections () {
-    socketRef.current.emit('leaving-meeting')
-  }
-  function LeaveMeeting () {
+  function LeaveMeeting (direct = false) {
+    if(!direct){
+      const confirm = window.confirm('Are you sure you want to leave this meeting?')
+      if(!confirm) return
+    }
     try {
       peers.forEach(({ peer }) => {
         peer.destroy()
@@ -66,7 +63,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     } catch (e) {
       console.log(e)
     } finally {
-      setUserLeft(true)
       CloseMedia()
       window.location.replace('/')
     }
@@ -76,14 +72,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       track.stop()
     })
   }
-  function SendInvite () {
-    // send some sort of link or btn to join
-    if (userToInvite) {
-      const to = userToInvite
-      const info = 'Join the meeting : ' + meetingId
-      socketRef.current.emit('send-notification', { to, info })
-    }
-  }
+  // Add the stream to peer
   useEffect(() => {
     try {
       peers.forEach(({ peer }) => {
@@ -160,14 +149,36 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       })
 
       window.onbeforeunload = confirmExit
-      window.onunload = DestroyConnections
-      window.onclose = DestroyConnections
+      window.onclose = () => LeaveMeeting(true)
       console.log(peers)
     } catch (e) {
       history.push('/')
     }
   }, [])
 
+  useEffect(() => {
+    const payload = {
+      type : 'streamState',
+      ...streamOptions
+    }
+    peers.forEach(({peer}) => { 
+      if(!peer.destroyed)
+        peer.send(JSON.stringify(payload))
+    })
+  }, [streamOptions])
+
+  useEffect(()=> {
+    peers.forEach(({peer}) => {
+      peer.on('data', (data:any) => {
+        // recived a chat. add it to the chat box
+        const payload = JSON.parse(data)
+        if(payload.type === 'chat')
+          receiveChat(payload)
+      })
+    })
+  }, [peers])
+
+  // Functions to handle peer connections
   function sendOffer (to: any, from: any, stream: any) {
     const peer = new Peer({
       initiator: true,
@@ -196,6 +207,36 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     return peer
   }
   
+  // Function to send Invite
+  function SendInvite () {
+    // send some sort of link or btn to join
+    if (userToInvite) {
+      const to = userToInvite
+      const info = 'Join the meeting : ' + meetingId
+      socketRef.current.emit('send-notification', { to, info })
+    }
+  }
+
+  // Functions to handle Chat 
+  const sendChat = (message:string) => {
+    const payload = {
+      type : 'chat',
+      from : user.name,
+      message 
+    }
+    peers.forEach(({peer}) => { 
+      if(!peer.destroyed)
+        peer.send(JSON.stringify(payload))
+    })
+    setChats((prev) => ([...prev, {from : 'me', message}]))
+  }
+  const receiveChat = (payload:any) => {
+    const {from, message} = payload
+    setChats((prev) => ([...prev, {from, message}]))
+  }
+  const toggleChatBox = () => setShowChat((prev) => !prev)
+
+  // Media Control Functions
   const stopAudio = () => {
     userStream.current?.getAudioTracks().forEach((track) => track.enabled = false)
     setStreamOptions((prev) => ({...prev, audio:false}))
@@ -212,34 +253,39 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     userStream.current?.getAudioTracks().forEach((track) => track.enabled = true)
     setStreamOptions((prev) => ({...prev, audio:true}))
   }
+
   const height = peers.length <= 2 ? '95%' : '70%'
   return (
-    <Flex column={true} className={classes.meeting} gap="gap.smaller">
-      <Flex hAlign='center'>
-        <Input placeholder='User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
-        <Button content='Invite' onClick={SendInvite} />
-      </Flex>
-      <Flex wrap className={classes.container}>
-        <Video videoRef={userVideo} info={'Myself'} height={height} />
-        {
-          peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
-        }
+    <div className={classes.container}>
+
+      <Flex column={true} className={classes.meeting} gap="gap.smaller">
+        <Flex hAlign='center' vAlign='center' gap="gap.small" className = {classes.topSection}>
+          <Input placeholder='Invite User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
+          <BellIcon onClick={SendInvite} />
+          <ChatIcon onClick={toggleChatBox} />
+        </Flex>
+        <Flex wrap className={classes.videoContainer}>
+          <Video streamState={streamOptions} videoRef={userVideo} info={'Myself'} height={height} muted={true} />
+          {
+            peers.map((value: any, index: any) => <PeerVideo key={value.info} height={height} peer={value.peer} info={value.info} />)
+          }
+        </Flex>
+
+        <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
+            {
+              streamOptions.video ? <CallVideoIcon className={classes.whiteIcon} onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon className={classes.redIcon} onClick={startVideo} size="larger"  circular />
+            }
+              <CallEndIcon className={classes.redIcon} onClick={() => LeaveMeeting()} size="larger" circular />
+            {
+              streamOptions.audio ? <MicIcon className={classes.whiteIcon} onClick={stopAudio} size="larger"  circular /> : <MicOffIcon className={classes.redIcon} onClick={startAudio} size="larger"  circular />
+            }
+        </Flex>
       </Flex>
 
-      <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
-          {
-            streamOptions.video ? <CallVideoIcon onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon onClick={startVideo} size="larger"  circular />
-          }
-            <CallEndIcon onClick={LeaveMeeting} size="larger" circular />
-          {
-            streamOptions.audio ? <MicIcon onClick={stopAudio} size="larger"  circular /> : <MicOffIcon onClick={startAudio} size="larger"  circular />
-          }
-      </Flex>
-      <Prompt
-        when={!userLeft}
-        message='Are you sure you want to leave?'
-      />
-    </Flex>
+      {
+       showChat && <MeetingChatBox toggleChatBox = {toggleChatBox} chats = {chats} sendChat = {sendChat} />
+      }
+    </div>
 
   )
 }

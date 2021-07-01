@@ -1,7 +1,16 @@
-.meeting{
-    height:90vh;
-}
 .container{
+    position:relative;
+    overflow-x: hidden;
+    background-color: #212121;
+    color : white;
+}
+.topSection{
+    margin-top:10px;
+}
+.meeting{
+    height:95vh;
+}
+.videoContainer{
     padding: 20px;
     height: 90vh;
     overflow-y: scroll;
@@ -16,4 +25,11 @@
     padding:10px;
     padding-bottom: 20px;
     color:#edf6f9;
+}
+
+.redIcon{
+    background: red;
+}
+.whiteIcon{ 
+    background: #1e1c1c;
 }
