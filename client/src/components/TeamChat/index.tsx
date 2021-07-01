@@ -28,6 +28,7 @@ const Chat = ({_id, from, message}:ChatProps) => {
 }
 const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
     const socketRef = useRef(socket)
+    const messagesEndRef = useRef<any>()
     const [chats, setChats] = useState<Array<ChatProps>>([])
     const [message, setMessage] = useState('')
     const {user} = useAuth()
@@ -36,21 +37,30 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
         method:'POST',
         body: {teamId}
     })
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    }
     useEffect(() => {
         socketRef.current.connect()
+        socketRef.current.emit('join-chat' , {teamId})
         socketRef.current.on('new-chat', (payload:any) => {
             receiveChat(payload)
         })
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
     useEffect(() => {
         if(response){
-            setChats((prev) => [response.chats,...prev])
+            setChats((prev) => ([...response.chats,...prev]))
         }
     }, [response])
-    
+    useEffect(() => {
+        scrollToBottom()
+    }, [chats])
     const sendChat = () => {
-        const payload = {message}
+        const payload = {message, teamId}
         socketRef.current.emit('send-chat' , payload)
+        setMessage('')
     }
     const receiveChat = ({_id, from, message}:ChatProps) => {
         setChats((prev) => ([...prev, {_id, from, message}]))
@@ -69,6 +79,7 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
                         )
                     })
                 }
+                <div ref={messagesEndRef} />
             </Flex>
             <Flex vAlign="end">
                 <Input placeholder="Send a message..." value={message} onChange={(e, data) => setMessage(data?.value || '')} fluid />

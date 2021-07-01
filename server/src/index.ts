@@ -12,6 +12,7 @@ import isAuthenticated, { getUserFromCookie } from './middleware/auth'
 import cookie from 'cookie'
 
 import Meeting from './models/meeting'
+import Chat from './models/chat'
 const app = express()
 const PORT = Number(process.env.PORT) || 8080
 const server = http.createServer(app)
@@ -95,6 +96,18 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     if (user) { SOCKET_MAP.delete(user.email) }
   })
+  socket.on('join-chat', ({teamId}) => {
+      socket.join(teamId)
+  })
+  socket.on('send-chat', async (payload) => {
+    const {message, teamId} = payload
+    // save this chat to database
+    const chat = new Chat({from : user.email, message, teamId})
+    const doc = await chat.save()
+    // broadcast this new chat event in the room
+    io.sockets.in(teamId).emit('new-chat', {_id : doc._id, message, from : user.email})
+  })
+
   socket.on('join-meeting', async (meetingId) => {
     // find if meeting exists and is active
     try {
