@@ -54,7 +54,7 @@ const TeamPage = (props: any): JSX.Element => {
         index === 2 && <Members members={response.team.members} />
       }
       {
-        index === 3 && <TeamChat />
+        index === 3 && <TeamChat teamId={id} />
       }
     </Flex>
   )
