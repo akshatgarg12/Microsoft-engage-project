@@ -1,6 +1,6 @@
 import { Form, FormInput, FormButton, Text, Flex, Button, CloseIcon } from '@fluentui/react-northstar'
 import { useReducer, useState } from 'react'
-
+import { validateEmail } from '../../constants'
 import { useHistory } from 'react-router-dom'
 import { callAPI, CallAPIReducer } from '../../utils/http'
 
@@ -35,6 +35,11 @@ const CreateTeamForm = (): JSX.Element => {
   }
   const onMemberAdd = (e: any) => {
     e.preventDefault()
+    if(!validateEmail(member)){
+      httpDispatch({type : 'ERROR', payload : 'Enter a valid email'})
+      return
+    }
+    httpDispatch({type : 'ERROR', payload : null})
     if (member !== '' && member) {
       setOfMembers.add(member)
       setFormData(prev => ({ ...prev, members: Array.from(setOfMembers) }))
@@ -56,14 +61,14 @@ const CreateTeamForm = (): JSX.Element => {
         method: 'POST',
         body: formData
       })
-      httpDispatch({ type: 'RESPONSE', payload: r.teamId })
+      httpDispatch({ type: 'RESPONSE', payload: r})
     } catch (e) {
       console.error(e)
       httpDispatch({ type: 'ERROR', payload: e.message })
     }
   }
   if (response) {
-    history.push('/team/' + response)
+    history.push('/team/' + response.teamId)
   }
   if (error) {
     console.error(error)
@@ -89,6 +94,12 @@ const CreateTeamForm = (): JSX.Element => {
         })
       }
       <FormButton loading={loading} content='Submit' onClick={onSubmitHandler} />
+        {
+          error && <Text error content={error} />
+        }
+        {
+          response && <Text success content={response.log} />
+        }
     </Form>
   )
 }

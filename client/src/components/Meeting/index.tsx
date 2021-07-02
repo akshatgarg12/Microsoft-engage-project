@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
 import { Flex, Input } from '@fluentui/react-northstar'
 import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon} from '@fluentui/react-icons-northstar'
+import {Text} from '@fluentui/react-northstar'
 import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
@@ -10,6 +11,7 @@ import classes from './style.module.css'
 import PeerVideo from '../PeerVideo'
 import useAuth from '../../hooks/useAuth'
 import MeetingChatBox from '../MeetingChatBox'
+import { validateEmail } from '../../constants'
 export interface MeetingProps {
   meetingId: string
 }
@@ -29,6 +31,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const userVideo = useRef<HTMLVideoElement>(null)
   const peersRef = useRef<any[]>([])
   const history = useHistory()
+  const [meetingInfo, setMeetingInfo] = useState<any>(null)
   const streamConstraints:MediaStreamConstraints = {
     audio : {
         sampleSize: 8,
@@ -101,6 +104,10 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
           // push user back to dashboard
           socketRef.current.disconnect()
           history.push('/')
+        })
+        // get meeting info
+        socketRef.current.on('meeting-info', (payload) => {
+          setMeetingInfo(payload)
         })
         // get all users in the room
         socketRef.current.on('meeting-members', (payload: any) => {
@@ -210,7 +217,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   // Function to send Invite
   function SendInvite () {
     // send some sort of link or btn to join
-    if (userToInvite) {
+    if (userToInvite && validateEmail(userToInvite)) {
       const to = userToInvite
       const info = 'Join the meeting : ' + meetingId
       socketRef.current.emit('send-notification', { to, info })
@@ -257,7 +264,12 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const height = peers.length <= 2 ? '95%' : '70%'
   return (
     <div className={classes.container}>
-
+        {
+          meetingInfo && 
+          <Flex style={{height:'40px'}}>
+           <Text content={meetingInfo?.title.toUpperCase()} style={{width:'100%', background:'#323131', color:'white', padding:'10px'}} /> 
+          </Flex>
+        }
       <Flex column={true} className={classes.meeting} gap="gap.smaller">
         <Flex hAlign='center' vAlign='center' gap="gap.small" className = {classes.topSection}>
           <Input placeholder='Invite User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
