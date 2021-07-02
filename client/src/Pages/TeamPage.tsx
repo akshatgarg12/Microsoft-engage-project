@@ -51,7 +51,7 @@ const TeamPage = (props: any): JSX.Element => {
         index === 1 && <TeamRecords meetings={response.meetings} />
       }
       {
-        index === 2 && <Members members={response.team.members} />
+        index === 2 && <Members teamId = {id} members={response.team.members} />
       }
       {
         index === 3 && <TeamChat teamId={id} />

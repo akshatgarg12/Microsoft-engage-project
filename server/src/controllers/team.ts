@@ -44,8 +44,41 @@ const getTeam = async (req: Request, res: Response) => {
     res.status(500).json({ status: '500', log: 'server error, try again later' })
   }
 }
+
+const addMember = async (req: Request, res: Response) => {
+  try {
+    const {teamId, email} = req.body
+    if(!teamId || !email){
+      res.status(400).json({ status: '400', log: 'Please send all required parameters' })
+      return
+    }
+    // check if this mail exists in team.
+    const team = await Team.findOne({ _id: teamId }).populate('members', 'email')
+    const alreadyMember = team.members.includes(email)
+    if(alreadyMember){
+      res.status(400).json({ status: '400', log: 'User is already a member' })
+      return
+    }
+    // check if the user exists
+    const user = await User.findOne({email})
+    if(!user){
+      res.status(404).json({ status: '404', log: "User doesn't exists" })
+      return
+    }
+    // add the user id to the team member
+    user.teams.push(teamId)
+    await Team.updateOne({_id : teamId}, {$push : {members : user._id}})
+    await user.save()
+    res.status(200).json({ status: '200', log: 'user added to team successfully, refresh to update' })
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({ status: '500', log: 'server error, try again later' })
+  }
+}
+
 export {
   getTeams,
   createTeam,
-  getTeam
+  getTeam,
+  addMember
 }
