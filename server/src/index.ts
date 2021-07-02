@@ -128,6 +128,8 @@ io.on('connection', socket => {
           }
           // get user in the room
           socket.join(meetingId)
+          // send meeting info
+          socket.emit('meeting-info', {title : meeting.title, active : meeting.active})
           // send the meeting members to the new user who joined
           socket.emit('meeting-members', { members, from: user.email })
 
