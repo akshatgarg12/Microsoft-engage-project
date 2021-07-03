@@ -5,6 +5,7 @@ import Members from '../components/Members'
 import TeamRecords from '../components/Records'
 import TeamChat from '../components/TeamChat'
 import useHttps from '../hooks/useHttp'
+import ErrorPage from './Error'
 import LoadingScreen from './Loading'
 
 export interface TeamPageProps {
@@ -22,8 +23,7 @@ const TeamPage = (props: any): JSX.Element => {
     return <LoadingScreen />
   }
   if (error) {
-    console.log(error)
-    return (<></>)
+    return <ErrorPage statusCode = {404} error={error} />
   }
 
   return (

@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import useHttps from "../../hooks/useHttp";
 import LoadingScreen from "../../Pages/Loading";
+import ErrorPage from "../../Pages/Error";
 
 export interface TeamChatProps {
     teamId : string   
@@ -67,7 +68,7 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
     }
 
     if(loading) return <LoadingScreen />
-    if(error) console.log(error)
+    if(error) return <ErrorPage statusCode={404} error={error} />
     return (
         <Flex column = {true} style={{width:'100%'}}>
             <Flex column = {true} className={classes.chatbox}>

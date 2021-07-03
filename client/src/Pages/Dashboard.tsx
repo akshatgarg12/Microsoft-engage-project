@@ -1,5 +1,6 @@
 import { Button, Flex, TeamCreateIcon } from '@fluentui/react-northstar'
 import { useHistory } from 'react-router-dom'
+import ErrorPage from './Error'
 import TeamCard from '../components/TeamCard'
 import useHttps from '../hooks/useHttp'
 import LoadingScreen from './Loading'
@@ -19,7 +20,7 @@ const Dashboard = (): JSX.Element => {
     return <LoadingScreen />
   }
   if (error) {
-    // show error screen
+    return <ErrorPage statusCode={403} error={error}/>
   }
   return (
     <div style={{ minHeight: '90vh' }}>
