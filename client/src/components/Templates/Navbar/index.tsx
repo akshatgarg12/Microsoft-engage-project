@@ -18,7 +18,7 @@ const Navbar = (): JSX.Element => {
     loading: false
   })
   const { dispatch } = useAuth()
-  // const {error, response, loading} = httpState
+  const {loading} = httpState
   const onLogoutHandler = async (e: any) => {
     e.preventDefault()
     httpDispatch({ type: 'LOADING' })
@@ -50,7 +50,7 @@ const Navbar = (): JSX.Element => {
                 title: 'Available'
               }}
             />
-            <Button content='logout' onClick={onLogoutHandler} icon={<ArrowLeftIcon />} text style={{ color: 'white' }} />
+            <Button content='logout' loading={loading} onClick={onLogoutHandler} icon={<ArrowLeftIcon />} text style={{ color: 'white' }} />
           </Flex>
       }
     </Flex>
