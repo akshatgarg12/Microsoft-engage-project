@@ -43,12 +43,15 @@ const TeamRecords = ({ meetings }: TeamRecordsProps): JSX.Element => {
   return (
     <Flex column gap='gap.small' className={classes.container}>
       {
+        meetings.length ? 
         meetings.map((meeting) => {
           const { _id, title, creator, attendedBy, active } = meeting
           return (
             <Records key={_id} _id={_id} title={title} creator={creator} attendedBy={attendedBy} active={active} />
           )
-        })
+        }) : (
+            <Text align="center" weight="bold" size="large" content="No Records found! Start by creating a new meeting👨🏻‍💻!" />
+        )
       }
     </Flex>
   )

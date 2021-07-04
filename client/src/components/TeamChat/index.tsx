@@ -71,17 +71,25 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
     if(error) return <ErrorPage statusCode={404} error={error} />
     return (
         <Flex column = {true} style={{width:'100%'}}>
-            <Flex column = {true} className={classes.chatbox}>
+            {
+                chats.length ? 
+                <Flex column = {true} className={classes.chatbox}>
                 {
                     chats.map((chat) => {
                         const {_id, from, message} = chat
                         return (
                             <Chat key={_id} _id = {_id} from={from === user.email ? 'me' : from} message={message} />
                         )
-                    })
+                    }) 
                 }
                 <div ref={messagesEndRef} />
-            </Flex>
+            </Flex> : (
+                <Flex style={{height:'100%', width:'100%'}} hAlign='center' vAlign='center'> 
+                    <Text align="center" weight="bold" size="large" content="No Message found! Start by saying a Hi👋🏼!" />
+                </Flex>
+                )
+            }
+            
             <Flex vAlign="end">
                 <Input placeholder="Send a message..." value={message} onChange={(e, data) => setMessage(data?.value || '')} fluid />
                 <Button content="send" onClick={sendChat} />
