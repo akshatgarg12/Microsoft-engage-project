@@ -1,5 +1,6 @@
-import { Button, Flex, TeamCreateIcon } from '@fluentui/react-northstar'
+import { Button, Flex, TeamCreateIcon, Text, Image } from '@fluentui/react-northstar'
 import { useHistory } from 'react-router-dom'
+import ErrorPage from './Error'
 import TeamCard from '../components/TeamCard'
 import useHttps from '../hooks/useHttp'
 import LoadingScreen from './Loading'
@@ -19,7 +20,7 @@ const Dashboard = (): JSX.Element => {
     return <LoadingScreen />
   }
   if (error) {
-    // show error screen
+    return <ErrorPage statusCode={403} error={error}/>
   }
   return (
     <div style={{ minHeight: '90vh' }}>
@@ -28,16 +29,24 @@ const Dashboard = (): JSX.Element => {
       </div>
       <Flex wrap style={{ width: '90%', maxWidth: '800px', margin: 'auto' }}>
         {
-          response && response.teams.map((team: any, idx: number) => {
-            return (
-              <TeamCard
-                key={team._id}
-                teamId={team._id}
-                name={team.name}
-                creator={team.creator}
-              />
+          response && (
+            response.teams.length ? 
+            response.teams.map((team: any, idx: number) => {
+              return (
+                <TeamCard
+                  key={team._id}
+                  teamId={team._id}
+                  name={team.name}
+                  creator={team.creator}
+                />
+              )
+            }) : (
+            <Flex column={true} hAlign="center" vAlign="center" gap="gap.large">
+                <Image style={{width:'75%'}} src={window.location.origin + '/assets/image/group.png'} />
+                <Text weight="bold" size="large" align="center" content="You Don't have any Team, Start by creating or joining one!" />
+            </Flex>
             )
-          })
+          )
         }
       </Flex>
     </div>
