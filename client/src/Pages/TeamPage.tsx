@@ -4,10 +4,11 @@ import CreateMeeting from '../components/CreateMeeting'
 import Members from '../components/Members'
 import TeamRecords from '../components/Records'
 import TeamChat from '../components/TeamChat'
+import DeleteTeam from '../components/DeleteTeam'
+import useAuth from '../hooks/useAuth'
 import useHttps from '../hooks/useHttp'
 import ErrorPage from './Error'
 import LoadingScreen from './Loading'
-
 export interface TeamPageProps {
 
 }
@@ -15,6 +16,7 @@ export interface TeamPageProps {
 const TeamPage = (props: any): JSX.Element => {
   const [index, setIndex] = useState<number>(0)
   const { id } = props.match.params
+  const {user} = useAuth()
   const { response, loading, error } = useHttps({
     path: '/team/' + id,
     method: 'GET'
@@ -25,7 +27,16 @@ const TeamPage = (props: any): JSX.Element => {
   if (error) {
     return <ErrorPage statusCode = {404} error={error} />
   }
-
+  const showOptionToDelete = user._id === response?.team.creator._id
+  const menu = [
+    'Meeting',
+    'Records',
+    'Members',
+    'Chats'
+  ]
+  if(showOptionToDelete){
+    menu.push('Settings')
+  }
   return (
     <>
       <Flex>
@@ -38,12 +49,7 @@ const TeamPage = (props: any): JSX.Element => {
             width: '275px',
             maxWidth: '30%'
           }}
-          items={[
-            'Meeting',
-            'Records',
-            'Members',
-            'Chats'
-          ]}
+          items={menu}
           primary
           vertical
           defaultActiveIndex={index}
@@ -60,6 +66,9 @@ const TeamPage = (props: any): JSX.Element => {
         }
         {
           index === 3 && <TeamChat teamId={id} />
+        }
+        {
+          index === 4 && <DeleteTeam teamId={id} />
         }
       </Flex>
     </>
