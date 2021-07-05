@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import Meeting from '../models/meeting'
 import Team from '../models/team'
 import User from '../models/user'
+import Chat from '../models/chat'
 
 const getTeams = async (req: Request, res: Response) => {
   // get the user object from isAuthenticated middleware
@@ -36,12 +37,48 @@ const getTeam = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
     const team = await Team.findOne({ _id: id }).populate('members creator', 'name')
+    if(!team){
+      res.status(404).json({ status: '404', log: 'Team not found!'})
+      return
+    }
     const meetings = team.meeting
     const meetingDetails = await Meeting.find().where('_id').in(meetings).populate('creator attendedBy', 'name').exec()
     res.status(200).json({ status: '200', log: 'Team fetched successfully', team, meetings: meetingDetails })
   } catch (e) {
     console.error(e)
     res.status(500).json({ status: '500', log: 'server error, try again later' })
+  }
+}
+
+const deleteTeam = async (req: Request, res: Response) => {
+  try {
+    const { teamId } = req.body
+    const team = await Team.findOne({ _id: teamId })
+    if(!team){
+      res.status(404).json({ status: '404', log: 'Team not found!'})
+      return
+    }
+    // @ts-ignore
+    const userId = req.user._id
+    // deny if not requested by the creator
+    if(team.creator.toString() !== userId.toString()){
+      res.status(403).json({ status: '403', log: 'Only the creator of team can delete it.'})
+      return
+    }
+    // delete team from members model,
+    const members = team.members
+    await User.updateMany({_id : {$in : members}}, {$pull : {teams : teamId}})
+    // delete chat related to the team,
+    await Chat.deleteMany({teamId})
+    // delete meetings of the team
+    const meetings = team.meeting
+    await Meeting.deleteMany({_id : {$in : meetings}})
+    // delete team
+    await Team.deleteOne({_id : teamId})
+    res.status(200).json({ status: '200', log: 'Team data deleted successfully'})
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({ status: '500', log: e.message })
   }
 }
 
@@ -80,5 +117,6 @@ export {
   getTeams,
   createTeam,
   getTeam,
+  deleteTeam,
   addMember
 }
