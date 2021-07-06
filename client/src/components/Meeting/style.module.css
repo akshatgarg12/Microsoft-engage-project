@@ -26,10 +26,14 @@
     padding-bottom: 20px;
     color:#edf6f9;
 }
-
+.control button{
+    color:'white' !important;
+    height:'3rem'; 
+    width:'3rem';
+}
 .redIcon{
-    background: red;
+    background: red !important;
 }
 .whiteIcon{ 
-    background: #1e1c1c;
+    background: #1e1c1c !important;
 }

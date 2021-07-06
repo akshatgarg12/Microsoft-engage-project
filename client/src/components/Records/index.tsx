@@ -1,4 +1,5 @@
 import { Button, Flex, Text } from '@fluentui/react-northstar'
+import { CallVideoIcon } from '@fluentui/react-icons-northstar'
 import { useHistory } from 'react-router-dom'
 import classes from './style.module.css'
 export interface UserInfo{
@@ -18,8 +19,8 @@ const Records = ({ _id, title, creator, attendedBy, active }: RecordsProps): JSX
   return (
     <div className={classes.record}>
       <Flex space='between'>
-        <Text content={title} />
-        <Text content={creator.name} />
+        <Text content={title} weight="bold" />
+        <Text content={'Started by ' + creator.name} />
       </Flex>
       <br />
       <Flex gap='gap.medium' space='between' vAlign='center'>
@@ -28,7 +29,7 @@ const Records = ({ _id, title, creator, attendedBy, active }: RecordsProps): JSX
         </div>
         {
           active
-            ? <Button content='Join Meeting' onClick={() => redirectToMeeting(_id)} />
+            ? <Button icon={<CallVideoIcon />} content='Join Meeting' onClick={() => redirectToMeeting(_id)} />
             : <Text content='meeting ended' />
         }
       </Flex>

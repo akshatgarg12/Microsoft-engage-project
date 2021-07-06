@@ -1,9 +1,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useRef, useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Flex, Input } from '@fluentui/react-northstar'
+import { Flex, Input, Button, Text, Tooltip } from '@fluentui/react-northstar'
 import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon} from '@fluentui/react-icons-northstar'
-import {Text} from '@fluentui/react-northstar'
 import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
@@ -43,6 +42,11 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       width: 700,
       height: 900,
     }
+  }
+  const controlBtnStyles = {
+    height:'3rem',
+    width:'3rem',
+    color:'white'
   }
   // Utility Functions
   function confirmExit () {
@@ -273,8 +277,14 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       <Flex column={true} className={classes.meeting} gap="gap.smaller">
         <Flex hAlign='center' vAlign='center' gap="gap.small" className = {classes.topSection}>
           <Input placeholder='Invite User Email...' value={userToInvite} onChange={(e, data) => setUserToInvite(String(data?.value) || '')} />
-          <BellIcon onClick={SendInvite} />
-          <ChatIcon onClick={toggleChatBox} />
+          <Tooltip
+            trigger={<Button icon={<BellIcon />} circular primary onClick={SendInvite} />}
+            content="Send Invite"
+          />
+          <Tooltip
+            trigger={<Button icon={<ChatIcon />} content="Chatbox" onClick={toggleChatBox} />}
+            content="Open Chatbox"
+          />
         </Flex>
         <Flex wrap className={classes.videoContainer}>
           <Video streamState={streamOptions} videoRef={userVideo} info={'Myself'} height={height} muted={true} />
@@ -285,11 +295,15 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
 
         <Flex hAlign='center' vAlign="end" gap="gap.large" className={classes.control }>
             {
-              streamOptions.video ? <CallVideoIcon className={classes.whiteIcon} onClick={stopVideo} size="larger"  circular /> : <CallVideoOffIcon className={classes.redIcon} onClick={startVideo} size="larger"  circular />
+              streamOptions.video ? 
+              <Button circular className={classes.whiteIcon} icon={<CallVideoIcon />} onClick={stopVideo} style={controlBtnStyles} />
+              : <Button circular className={classes.redIcon} icon={<CallVideoOffIcon />} onClick={startVideo} style={controlBtnStyles} />
             }
-              <CallEndIcon className={classes.redIcon} onClick={() => LeaveMeeting()} size="larger" circular />
+              <Button circular className={classes.redIcon} icon={<CallEndIcon />} onClick={() => LeaveMeeting()} style={controlBtnStyles} />
             {
-              streamOptions.audio ? <MicIcon className={classes.whiteIcon} onClick={stopAudio} size="larger"  circular /> : <MicOffIcon className={classes.redIcon} onClick={startAudio} size="larger"  circular />
+              streamOptions.audio ? 
+              <Button circular className={classes.whiteIcon} icon={<MicIcon />} onClick={stopAudio} style={controlBtnStyles} />
+              : <Button circular className={classes.redIcon} icon={<MicOffIcon />} onClick={startAudio} style={controlBtnStyles} />
             }
         </Flex>
       </Flex>

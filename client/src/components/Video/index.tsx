@@ -17,7 +17,7 @@ const Video = ({height, videoRef, info, streamState, muted=false}:VideoProps):JS
     return (
         <div className={classes.peerVideoContainer} style={{height}}>
             <video className={classes.styledVideo} ref={videoRef} autoPlay muted={muted} /> 
-            <Flex className={classes.overlay} gap="gap.small" vAlign="center" >
+            <Flex style={{maxWidth:'90%'}} className={classes.overlay} gap="gap.small" vAlign="center" >
                 {
                     streamState.audio ? <MicIcon /> : <MicOffIcon />
                 }

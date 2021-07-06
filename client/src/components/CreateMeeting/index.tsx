@@ -1,10 +1,10 @@
 import { Button, Flex, Image, Input } from '@fluentui/react-northstar'
+import {MeetingNewIcon} from '@fluentui/react-icons-northstar'
 import { useReducer, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import LoadingScreen from '../../Pages/Loading'
 import { callAPI, CallAPIReducer } from '../../utils/http'
 import classes from './style.module.css'
-
 export interface CreateMeetingProps {
   teamId: string
 }
@@ -53,7 +53,7 @@ const CreateMeeting = ({ teamId }: CreateMeetingProps): JSX.Element => {
     <Flex column className={classes.container} hAlign='center' vAlign='center' gap='gap.small'>
       <Image className={classes.image} src={window.location.origin + '/assets/image/group.png'} />
       <Input placeholder='Title...' value={title} onChange={(_, data) => setTitle(data?.value || '')} />
-      <Button primary content='Create a new meeting' onClick={createMeeting} />
+      <Button icon={<MeetingNewIcon />}primary content='Create a new meeting' onClick={createMeeting} />
     </Flex>
   )
 }
