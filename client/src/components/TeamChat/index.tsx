@@ -45,6 +45,18 @@ const TeamChat = ({teamId} : TeamChatProps):JSX.Element => {
         socketRef.current.connect()
         socketRef.current.emit('join-chat' , {teamId})
         socketRef.current.on('new-chat', (payload:any) => {
+            const {from, message} = payload
+            const to = user.email
+            const info = {
+                type : 'new team chat',
+                chatInfo : {
+                    from , 
+                    message,
+                    teamId
+                },
+                message : `Received a new message from ${from} on team`  
+            }
+            socketRef.current.emit('send-notification', { to, info })
             receiveChat(payload)
         })
 

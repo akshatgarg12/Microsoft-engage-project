@@ -17,11 +17,11 @@ ReactDOM.render(
       autoDismissTimeout={6000}
       placement="bottom-center"
     >
-      <NotificationListener>
         <AuthContextProvider>
-          <App />
+            <NotificationListener>
+              <App />
+          </NotificationListener>
         </AuthContextProvider>
-      </NotificationListener>
     </ToastProvider>
   </Provider>,
   document.getElementById('root')
