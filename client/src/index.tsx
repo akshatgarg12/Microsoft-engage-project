@@ -12,7 +12,11 @@ socket.emit('hello', 'Client this side.')
 
 ReactDOM.render(
   <Provider theme={teamsTheme}>
-    <ToastProvider>
+    <ToastProvider
+      autoDismiss
+      autoDismissTimeout={6000}
+      placement="bottom-center"
+    >
       <NotificationListener>
         <AuthContextProvider>
           <App />

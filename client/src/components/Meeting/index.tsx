@@ -223,7 +223,14 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     // send some sort of link or btn to join
     if (userToInvite && validateEmail(userToInvite)) {
       const to = userToInvite
-      const info = 'Join the meeting : ' + meetingId
+      const info = {
+        type : 'meeting invite',
+        meetingInfo:{
+          title : meetingInfo?.title,
+          _id : meetingId
+        }, 
+        message : 'Join the meeting : ' + meetingInfo?.title
+      }
       socketRef.current.emit('send-notification', { to, info })
     }
   }
