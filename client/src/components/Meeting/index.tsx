@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useRef, useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
+import { useToasts } from 'react-toast-notifications'
 import { Flex, Input, Button, Text, Tooltip } from '@fluentui/react-northstar'
-import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon} from '@fluentui/react-icons-northstar'
+import { CallVideoIcon, CallVideoOffIcon, MicIcon, MicOffIcon,CallEndIcon,ChatIcon, BellIcon,ClipboardCopiedToIcon} from '@fluentui/react-icons-northstar'
 import Video from '../Video'
 import socket from '../../config/socket'
 import Peer from 'simple-peer'
@@ -18,6 +19,7 @@ export interface MeetingProps {
 const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const [peers, setPeers] = useState<any[]>([])
   const {user} = useAuth()
+  const {addToast} = useToasts()
   const [userToInvite, setUserToInvite] = useState<any>('')
   const [chats, setChats] = useState<Array<any>>([])
   const [showChat, setShowChat] = useState(false)
@@ -234,7 +236,10 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       socketRef.current.emit('send-notification', { to, info })
     }
   }
-
+  const copyMeetingLinkToClipboard = () => {
+    navigator.clipboard.writeText(window.location.href)
+    addToast('Meeting link copied!', {appearence : 'success'})
+  }
   // Functions to handle Chat 
   const sendChat = (message:string) => {
     const payload = {
@@ -277,8 +282,9 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     <div className={classes.container}>
         {
           meetingInfo && 
-          <Flex style={{height:'40px'}}>
-           <Text content={meetingInfo?.title.toUpperCase()} style={{width:'100%', background:'#323131', color:'white', padding:'10px'}} /> 
+          <Flex hAlign="center" vAlign="center" space="between" style={{height:'40px', width:'100%', background:'#323131', color:'white', padding:'10px'}} >
+           <Text content={meetingInfo?.title.toUpperCase()} /> 
+           <Button icon={<ClipboardCopiedToIcon />} content="Meeting Link" onClick={copyMeetingLinkToClipboard} />
           </Flex>
         }
       <Flex column={true} className={classes.meeting} gap="gap.smaller">
