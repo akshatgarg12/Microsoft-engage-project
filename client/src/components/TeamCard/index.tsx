@@ -30,7 +30,7 @@ const TeamCard = ({ teamId, name, creator }: TeamCardProps): JSX.Element => {
       </Card.Header>
       <Card.Body>
         {/* A random image */}
-        <Image src='https://picsum.photos/150?grayscale' fluid />
+        <Image src='https://picsum.photos/150' fluid />
       </Card.Body>
     </Card>
   )
