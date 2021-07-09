@@ -256,6 +256,9 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const receiveChat = (payload:any) => {
     const {from, message} = payload
     setChats((prev) => ([...prev, {from, message}]))
+    if(!showChat){
+      addToast('new chat received!', {appearance:'info'})
+    }
   }
   const toggleChatBox = () => setShowChat((prev) => !prev)
 
