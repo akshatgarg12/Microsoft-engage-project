@@ -234,6 +234,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         message : 'Join the meeting : ' + meetingInfo?.title
       }
       socketRef.current.emit('send-notification', { to, info })
+      addToast('Invitation sent!', {appearance:'info'})
     }
   }
   const copyMeetingLinkToClipboard = () => {
