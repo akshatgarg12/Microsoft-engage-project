@@ -170,26 +170,26 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    const payload = {
-      type : 'streamState',
-      ...streamOptions
+    try{
+      const payload = {
+        type : 'streamState',
+        ...streamOptions
+      }
+      peers.forEach(({peer}) => { 
+          if(!peer.destroyed)
+            peer.send(JSON.stringify(payload))
+      })
+    }catch(e){
+      // console.log(e)
     }
-    peers.forEach(({peer}) => { 
-      if(!peer.destroyed)
-        peer.send(JSON.stringify(payload))
-    })
+    
   }, [streamOptions])
 
   useEffect(()=> {
-    peers.forEach(({peer}) => {
-      peer.on('data', (data:any) => {
-        // recived a chat. add it to the chat box
-        const payload = JSON.parse(data)
-        if(payload.type === 'chat')
-          receiveChat(payload)
-      })
+    socketRef.current.on('new-meeting-chat', (payload) => {
+      receiveChat(payload)
     })
-  }, [peers])
+  }, [])
 
   // Functions to handle peer connections
   function sendOffer (to: any, from: any, stream: any) {
@@ -272,19 +272,17 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   // Functions to handle Chat 
   const sendChat = (message:string) => {
     const payload = {
-      type : 'chat',
-      from : user.name,
-      message 
+      message, meetingId
     }
-    peers.forEach(({peer}) => { 
-      if(!peer.destroyed)
-        peer.send(JSON.stringify(payload))
-    })
-    setChats((prev) => ([...prev, {from : 'me', message}]))
+    socketRef.current.emit('send-meeting-chat', payload)
   }
   const receiveChat = (payload:any) => {
     const {from, message} = payload
-    setChats((prev) => ([...prev, {from, message}]))
+    if(from === user.email){
+      setChats((prev) => ([...prev, {from:'me', message}]))
+    }else{
+      setChats((prev) => ([...prev, {from, message}]))
+    }
     if(!showChat){
       addToast('new chat received!', {appearance:'info'})
     }
