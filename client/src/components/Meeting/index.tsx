@@ -10,6 +10,7 @@ import Peer from 'simple-peer'
 import classes from './style.module.css'
 import PeerVideo from '../PeerVideo'
 import useAuth from '../../hooks/useAuth'
+import useHttps from '../../hooks/useHttp'
 import MeetingChatBox from '../MeetingChatBox'
 import { validateEmail } from '../../constants'
 export interface MeetingProps {
@@ -19,6 +20,12 @@ export interface MeetingProps {
 const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
   const [peers, setPeers] = useState<any[]>([])
   const {user} = useAuth()
+
+  const {response} = useHttps({
+    path: '/meeting/chat',
+    method:'POST',
+    body: {meetingId}
+  })
   const {addToast} = useToasts()
   const [userToInvite, setUserToInvite] = useState<any>('')
   const [chats, setChats] = useState<Array<any>>([])
@@ -81,6 +88,19 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       track.stop()
     })
   }
+  // receive meeting chats
+  useEffect(() => {
+    if(response){
+        const chats = response.chats.map((chat:any) =>{
+          const from = chat.from === user.email ? 'me' : chat.from
+          return {
+            ...chat, from
+          }
+        })
+        setChats((prev) => ([...chats,...prev]))
+    }
+  }, [response])
+
   // Add the stream to peer
   useEffect(() => {
     try {
@@ -180,7 +200,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
             peer.send(JSON.stringify(payload))
       })
     }catch(e){
-      // console.log(e)
+      // console.log(e) 
     }
     
   }, [streamOptions])
