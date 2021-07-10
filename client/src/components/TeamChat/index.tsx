@@ -15,7 +15,7 @@ export interface ChatProps{
     from : string
     message : string
 }
-const Chat = ({_id, from, message}:ChatProps) => {
+export const Chat = ({_id, from, message}:ChatProps) => {
     const hAlign = from === 'me' ? 'end' : 'start'
     const textAlign = from === 'me' ? 'right' :  'left'
     return (
