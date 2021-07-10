@@ -3,7 +3,8 @@ const ObjectId = mongoose.Schema.Types.ObjectId
 interface Chat{
   from: string
   message : string
-  teamId : ObjectId
+  teamId ?: ObjectId,
+  meetingId ?: ObjectId
 }
 
 const ChatSchema = new mongoose.Schema<Chat>({
@@ -18,6 +19,10 @@ const ChatSchema = new mongoose.Schema<Chat>({
   teamId : {
       type: ObjectId,
       ref : 'Team'
+  },
+  meetingId : {
+    type: ObjectId,
+    ref : 'Meeting'
   }
 }, {
   timestamps: true
