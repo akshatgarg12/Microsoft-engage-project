@@ -213,7 +213,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
 
   // Functions to handle peer connections
   function sendOffer (to: any, from: any, stream: any) {
-    try{
       const peer = new Peer({
         initiator: true,
         trickle: true,
@@ -239,13 +238,9 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         socketRef.current.emit('sending-signal', { to, from, signal })
       })
       return peer
-    }catch(e){
-      window.location.reload()
-    }
   }
 
   function sendAnswer (offer: any, from: any, to: any, stream: any) {
-    try{
       const peer = new Peer({
         initiator: false,
         trickle: true,
@@ -273,9 +268,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         socketRef.current.emit('user-answer', { signal, to: from, from: to })
       })
       return peer
-    }catch(e){
-      window.location.reload()
-    }
   }
   
   // Function to send Invite
