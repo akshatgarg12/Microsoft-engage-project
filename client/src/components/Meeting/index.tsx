@@ -197,6 +197,7 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       initiator: true,
       trickle: false,
       stream,
+      iceTransportPolicy: 'relay',
       config: {
         iceServers: [
           {
@@ -224,17 +225,18 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       initiator: false,
       trickle: false,
       stream,
+      iceTransportPolicy: 'relay',
       config: {
         iceServers: [
           {
             "urls": "stun:numb.viagenie.ca",
-            "username": 'akshatarungarg78@gmail.com',
-            "credential": 'Fiitjee!123'
+            "username": 'btech10251.19@bitmesra.ac.in',
+            "credential": 'password'
           },
           {
             "urls": "turn:numb.viagenie.ca",
-            "username": "akshatarungarg78@gmail.com",
-            "credential": "Fiitjee!123"
+            "username": "btech10251.19@bitmesra.ac.in",
+            "credential": "password"
           }
         ]
       }
