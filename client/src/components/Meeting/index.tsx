@@ -213,62 +213,61 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
 
   // Functions to handle peer connections
   function sendOffer (to: any, from: any, stream: any) {
-      const peer = new Peer({
-        initiator: true,
-        trickle: true,
-        stream,
-        config: {
-          iceTransportPolicy:'relay',
-          iceServers: [
-            {
-              "urls": "stun:numb.viagenie.ca",
-              "username": 'btech10251.19@bitmesra.ac.in',
-              "credential": 'password'
-            },
-            {
-              "urls": "turn:numb.viagenie.ca",
-              "username": "btech10251.19@bitmesra.ac.in",
-              "credential": "password"
-            }
-          ]
-        }
-      })
-      // immediately fires off and sends offer to users in room
-      peer.on('signal', signal => {
-        socketRef.current.emit('sending-signal', { to, from, signal })
-      })
-      return peer
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream,
+      config: {
+        iceServers: [
+          {
+            "urls": "stun:numb.viagenie.ca",
+            "username": 'akshatarungarg78@gmail.com',
+            "credential": '***REMOVED***'
+          },
+          {
+            "urls": "turn:numb.viagenie.ca",
+            "username": "akshatarungarg78@gmail.com",
+            "credential": "***REMOVED***"
+          }
+        ]
+      }
+    })
+    // immediately fires off and sends offer to users in room
+    peer.on('signal', signal => {
+      socketRef.current.emit('sending-signal', { to, from, signal })
+    })
+    return peer
   }
 
   function sendAnswer (offer: any, from: any, to: any, stream: any) {
-      const peer = new Peer({
-        initiator: false,
-        trickle: true,
-        stream,
-        config: {
-          iceTransportPolicy:'relay',
-          iceServers: [
-            {
-              "urls": "stun:numb.viagenie.ca",
-              "username": 'btech10251.19@bitmesra.ac.in',
-              "credential": 'password'
-            },
-            {
-              "urls": "turn:numb.viagenie.ca",
-              "username": "btech10251.19@bitmesra.ac.in",
-              "credential": "password"
-            }
-          ]
-        }
-      })
-      // accept the incoming signal
-      peer.signal(offer)
-      // fires off after incoming signal
-      peer.on('signal', signal => {
-        socketRef.current.emit('user-answer', { signal, to: from, from: to })
-      })
-      return peer
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream,
+      config: {
+        iceServers: [
+          {
+            "urls": "stun:numb.viagenie.ca",
+            "username": 'btech10251.19@bitmesra.ac.in',
+            "credential": 'password'
+          },
+          {
+            "urls": "turn:numb.viagenie.ca",
+            "username": "btech10251.19@bitmesra.ac.in",
+            "credential": "password"
+          }
+        ]
+      }
+    })
+    // accept the incoming signal
+    peer.signal(offer)
+    // fires off after incoming signal
+    peer.on('signal', signal => {
+      socketRef.current.emit('user-answer', { signal, to: from, from: to })
+    })
+    return peer
   }
+  
   
   // Function to send Invite
   function SendInvite () {
