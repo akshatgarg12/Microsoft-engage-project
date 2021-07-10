@@ -197,7 +197,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       initiator: true,
       trickle: false,
       stream,
-      iceTransportPolicy: 'relay',
       config: {
         iceServers: [
           {
@@ -225,7 +224,6 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
       initiator: false,
       trickle: false,
       stream,
-      iceTransportPolicy: 'relay',
       config: {
         iceServers: [
           {
