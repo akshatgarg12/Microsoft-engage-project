@@ -196,7 +196,21 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     const peer = new Peer({
       initiator: true,
       trickle: false,
-      stream
+      stream,
+      config: {
+        iceServers: [
+          {
+            "urls": "stun:numb.viagenie.ca",
+            "username": 'akshatarungarg78@gmail.com',
+            "credential": '***REMOVED***'
+          },
+          {
+            "urls": "turn:numb.viagenie.ca",
+            "username": "akshatarungarg78@gmail.com",
+            "credential": "***REMOVED***"
+          }
+        ]
+      }
     })
     // immediately fires off and sends offer to users in room
     peer.on('signal', signal => {
@@ -209,7 +223,21 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     const peer = new Peer({
       initiator: false,
       trickle: false,
-      stream
+      stream,
+      config: {
+        iceServers: [
+          {
+            "urls": "stun:numb.viagenie.ca",
+            "username": 'akshatarungarg78@gmail.com',
+            "credential": '***REMOVED***'
+          },
+          {
+            "urls": "turn:numb.viagenie.ca",
+            "username": "akshatarungarg78@gmail.com",
+            "credential": "***REMOVED***"
+          }
+        ]
+      }
     })
     // accept the incoming signal
     peer.signal(offer)
