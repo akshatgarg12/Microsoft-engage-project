@@ -107,7 +107,13 @@ io.on('connection', socket => {
     // broadcast this new chat event in the room
     io.sockets.in(teamId).emit('new-chat', {_id : doc._id, message, from : user.email})
   })
-
+  socket.on('send-meeting-chat', async (payload) => {
+    const {message, meetingId} = payload;
+    const from = user.email
+    const chat = new Chat({from, message, meetingId})
+    const doc = await chat.save()
+    io.to(meetingId).emit('new-meeting-chat', {_id:doc._id, from, message})
+  })
   socket.on('join-meeting', async (meetingId) => {
     // find if meeting exists and is active
     try {
