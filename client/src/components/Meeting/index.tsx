@@ -216,9 +216,10 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     try{
       const peer = new Peer({
         initiator: true,
-        trickle: false,
+        trickle: true,
         stream,
         config: {
+          iceTransportPolicy:'relay',
           iceServers: [
             {
               "urls": "stun:numb.viagenie.ca",
@@ -247,9 +248,10 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
     try{
       const peer = new Peer({
         initiator: false,
-        trickle: false,
+        trickle: true,
         stream,
         config: {
+          iceTransportPolicy:'relay',
           iceServers: [
             {
               "urls": "stun:numb.viagenie.ca",
