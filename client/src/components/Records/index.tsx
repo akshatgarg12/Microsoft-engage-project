@@ -1,6 +1,5 @@
 import { Button, Flex, Text } from '@fluentui/react-northstar'
 import { CallVideoIcon } from '@fluentui/react-icons-northstar'
-import { useHistory } from 'react-router-dom'
 import classes from './style.module.css'
 export interface UserInfo{
   _id: string
@@ -14,8 +13,7 @@ export interface RecordsProps {
   active: boolean
 }
 const Records = ({ _id, title, creator, attendedBy, active }: RecordsProps): JSX.Element => {
-  const history = useHistory()
-  const redirectToMeeting = (_id: string) => history.push('/meeting/' + _id)
+  const redirectToMeeting = (_id: string) => window.location.replace('/meeting/' + _id)
   return (
     <div className={classes.record}>
       <Flex space='between'>
