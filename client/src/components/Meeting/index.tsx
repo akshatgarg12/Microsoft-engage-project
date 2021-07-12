@@ -221,13 +221,13 @@ const Meeting = ({ meetingId }: MeetingProps): JSX.Element => {
         iceServers: [
           {
             "urls": "stun:numb.viagenie.ca",
-            "username": 'akshatarungarg78@gmail.com',
-            "credential": '***REMOVED***'
+            "username": 'triumphdiaries20@gmail.com',
+            "credential": 'password'
           },
           {
             "urls": "turn:numb.viagenie.ca",
-            "username": "akshatarungarg78@gmail.com",
-            "credential": "***REMOVED***"
+            "username": 'triumphdiaries20@gmail.com',
+            "credential": 'password'
           }
         ]
       }
