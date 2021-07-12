@@ -1,9 +1,11 @@
-<h1 align="center">Microsoft Teams Clone</h1>
-
-<div align="center">Teams clone created for program Microsoft Engage'21</div>
-
-[User guide and documentation](https://docs.google.com/document/d/10dPu8eNqgqIco803z9e7D7Gf9fN4D9HgAuBp5E7uplg/edit?usp=sharing)
+<p align="center">
+  <img height="300px"src="docs/hero.png" />
+</p>
 <hr />
+
+> ## Documentation
+- Complete info about project and user guide can be found in this [doc](https://github.com/akshatgarg12/Microsoft-engage-project/blob/main/docs/doc.pdf) 
+- [User guide and documentation](https://docs.google.com/document/d/10dPu8eNqgqIco803z9e7D7Gf9fN4D9HgAuBp5E7uplg/edit?usp=sharing)
 
 > ## Tech Stack 
 - ReactJS with typescript for frontend and Fluent UI as a component library 
@@ -45,5 +47,7 @@ install the dependencies and use the shell script from the root
 ```sh
    sh run_server.sh
 ```
-> ## Documentation
-Complete info about project and user guide can be found in this [doc](https://github.com/akshatgarg12/Microsoft-engage-project/blob/main/docs/doc.pdf) and demo in this video 
+> ## Deployment
+- Frontend is deployed to vercel 
+- Server is deployed to Heroku
+- MongoDb is deployed to MongoAtlas
