@@ -2,6 +2,7 @@
 
 <div align="center">Teams clone created for program Microsoft Engage'21</div>
 
+[User guide and documentation](https://docs.google.com/document/d/10dPu8eNqgqIco803z9e7D7Gf9fN4D9HgAuBp5E7uplg/edit?usp=sharing)
 <hr />
 
 > ## Tech Stack 
@@ -45,4 +46,4 @@ install the dependencies and use the shell script from the root
    sh run_server.sh
 ```
 > ## Documentation
-Complete info about project and user guide can be found in this doc and demo in this video 
+Complete info about project and user guide can be found in this [doc](https://github.com/akshatgarg12/Microsoft-engage-project/blob/main/docs/doc.pdf) and demo in this video 
